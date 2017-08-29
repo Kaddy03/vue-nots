@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- BEGIN TEMPLATE -->
-    <router-view v-bind:user="user" v-on:setUser($event)></router-view>
+    <router-view></router-view>
     <!-- END TEMPLATE -->
   </div>
 </template>
@@ -11,6 +11,7 @@
 import signUp from './components/signUp.vue';
 import logIn from './components/logIn.vue';
 import products from './components/products.vue';
+import orders from './components/orders.vue';
 import addProducts from './components/addProducts.vue';
 
 export default {
@@ -18,17 +19,12 @@ export default {
     'signUp': signUp,
     'logIn': logIn,
     'products': products,
-    'addProducts': addProducts
+    'orders': orders,
+    'addProduct': addProducts
   },
-  data () {
-    return {
-      user: ''
-    }
-  },
+
   methods: {
-    setUser: function(userKey) {
-      this.user = userKey;
-    }
+
   }
 }
 

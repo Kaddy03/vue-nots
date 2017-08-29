@@ -1,40 +1,39 @@
 <template>
   <div>
     <!-- BEGIN TEMPLATE -->
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
-    <!-- HEADER -->
-  <header class="mdl-layout__header">
-    <div class="contentHeader mdl-layout__header-row">
-      <h2 class="mdl-layout-title"><i class="material-icons">shopping_cart</i> {{ title }}</h2>
-      <div class="mdl-layout-spacer"></div>
-    </div>
-  </header>
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
   <!-- SIDE DRAWER -->
   <div class="mdl-layout__drawer">
-    <span class="drawerHeader mdl-layout-title">Tailor Name</span>
+    <div class="drawerHeader mdl-layout-title">Tailor Name
+    <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
+        <i class="material-icons" role="presentation">account_circle</i>
+    </button>
+    <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
+      <li disabled class="mdl-menu__item">Edit Profile</li>
+      <router-link v-bind:to="'/nots'" exact><li class="mdl-menu__item">Logout</li></router-link>
+    </ul>
+    </div>
     <nav class="mdl-navigation">
-      <a id="requ" class="mdl-navigation__link" href="">Requests</a>
-      <a id="prod" class="mdl-navigation__link" href="">Products</a>
-      <a id="mto" class="mdl-navigation__link" href="">Made-to-Order Offers</a>
-      <a id="msg" class="mdl-navigation__link" href="">Messages</a>
+      <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
+        <span id="ords" class="mdl-navigation__link">All Orders</span>
+      </router-link>
+      <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
+        <span id="prods" class="mdl-navigation__link">My Products</span>
+      </router-link>
     </nav>
   </div>
   <!-- MAIN CONTENT -->
   <main class="mdl-layout__content">
     <div class="page-content">
-      <!-- CONTAINER -->
-      <div class="container">
         <div class="mdl-grid">
-          <div class="mdl-cell mdl-cell--4-col">
-            <router-link to="/nots/tailor/products/addProducts" exact>
-            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-
-              <i class="material-icons">add_circle</i> Add Products
-
+          <h5>My Products</h5>
+        </div>
+        <div class="mdl-grid">
+            <router-link v-bind:to="'/nots/' + tailorId + '/products/addProducts'" exact>
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
+              <i class="material-icons">add_circle</i> Add a Product
             </button>
             </router-link>
-          </div>
-          <div class="mdl-cell mdl-cell--8-col"></div>
         </div>
         <div class="mdl-grid">
           <!-- PRODUCT LIST -->
@@ -43,6 +42,8 @@
               <tr>
                 <th class="mdl-data-table__cell--non-numeric">Type</th>
                 <th>Size</th>
+                <th>Color</th>
+                <th>Fabric</th>
                 <th>Price</th>
                 <th>Stock</th>
                 <th>Reserved</th>
@@ -53,6 +54,8 @@
               <tr v-for="product in products">
                 <td class="mdl-data-table__cell--non-numeric">{{ product.pType }}</td>
                 <td>{{ product.pSize }}</td>
+                <td>{{ product.pColor }}</td>
+                <td>{{ product.pFabric }}</td>
                 <td>{{ product.pPrice }}</td>
                 <td>{{ product.pStock }}</td>
                 <td>{{ product.pReserved }}</td>
@@ -68,7 +71,6 @@
             </tbody>
           </table>
         </div>
-      </div>
     </div>
   </main>
   </div>
@@ -82,9 +84,10 @@
 export default {
   data () {
     return {
+      tailorId: this.$route.params.id,
       products: [],
       title: "Products",
-      prod: true
+      prods: true
     }
   },
   methods: {
@@ -100,8 +103,8 @@ export default {
             productsArray.push(data[key]);
         }
         this.products = productsArray;
-        console.log(this.products);
     });
+    console.log(this.products);
   }
 }
 
@@ -110,26 +113,31 @@ export default {
 <!-- STYLING -->
 <style scoped>
 
-.drawerHeader{
-  background-color: #428BCA;
+h5{
+  background-color: #b3b3b3;
+  width: 100%;
+  padding: 10px;
+  color: white;
 }
-.contentHeader{
-  background-color: #21C0C0;;
+.drawerHeader{
+  background-color: #3f51b5;
+  color: white;
 }
 .mdl-layout__content{
   background-color: #808080;
 }
-.container{
-	width: 95%;
-	margin: auto;
-	box-shadow: 0 4px 8px 8px rgba(0, 0, 0, 0.2), 0 6px 20px 20px rgba(0, 0, 0, 0.19);
+.page-content{
 	background-color: white;
-  height: 572px;
+  height: 650px;
+  padding-left: 20px;
 }
 .mdl-data-table{
-  width: 700px;
+  width: 100%;
 }
-#prod{
+.mdl-button{
+  margin-left: 0;
+}
+#prods{
   background-color: #21C0C0;
   color: white;
 }

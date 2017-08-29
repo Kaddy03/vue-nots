@@ -7,10 +7,12 @@
         <div class="mdl-layout__header-row">
           <span class="mdl-layout-title"><h3>Sign Up as a Tailor</h3></span>
           <div class="mdl-layout-spacer"></div>
-          <button class="mdl-button mdl-js-button mdl-js-ripple-effect" onclick="logout()">
+          <router-link v-bind:to="'/nots'">
+          <button class="mdl-button mdl-js-button mdl-js-ripple-effect">
 	           <i class="material-icons">keyboard_backspace</i>
 		         Back to Login Page
 	        </button>
+          </router-link>
         </div>
       </header>
       <!-- FORM -->
@@ -43,6 +45,10 @@
 			    <input class="mdl-textfield__input" type="password" id="tRePassword">
 			    <label class="mdl-textfield__label" for="tRePassword">Re-type Password</label>
 		  </div>
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" v-model="tailor.tEmailAdd">
+			    <input class="mdl-textfield__input" type="text" id="tEmailAdd">
+			    <label class="mdl-textfield__label" for="tEmailAdd">Email Address</label>
+		  </div>
       <!-- SIGN UP CONTROLS -->
       <p>
 		      <input type="checkbox"> I have read the the <a href="#">Terms and Conditions</a>
@@ -68,7 +74,8 @@ export default {
         tDescription: "",
         tContact: "",
         tUsername: "",
-        tPassword: ""
+        tPassword: "",
+        tEmailAdd: ""
       },
       password2: "",
       accepted: false
