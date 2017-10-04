@@ -13,6 +13,7 @@ import logIn from './components/logIn.vue';
 import products from './components/products.vue';
 import orders from './components/orders.vue';
 import addProducts from './components/addProducts.vue';
+import productTypes from './components/productTypes.vue';
 
 export default {
   components: {
@@ -20,6 +21,7 @@ export default {
     'logIn': logIn,
     'products': products,
     'orders': orders,
+    'productTypes': productTypes,
     'addProduct': addProducts
   },
 

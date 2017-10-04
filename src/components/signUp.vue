@@ -45,16 +45,18 @@
 			    <input class="mdl-textfield__input" type="password" id="tRePassword">
 			    <label class="mdl-textfield__label" for="tRePassword">Re-type Password</label>
 		  </div>
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" v-model="tailor.tEmailAdd">
-			    <input class="mdl-textfield__input" type="text" id="tEmailAdd">
+      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+			    <input class="mdl-textfield__input" type="text" id="tEmailAdd" v-model="tailor.tEmailAdd">
 			    <label class="mdl-textfield__label" for="tEmailAdd">Email Address</label>
 		  </div>
       <!-- SIGN UP CONTROLS -->
       <p>
 		      <input type="checkbox"> I have read the the <a href="#">Terms and Conditions</a>
-		      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="post">
+          <router-link v-bind:to="'/nots'">
+		      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="post">
 			         <i class="material-icons">done_all</i> Sign Up
 		      </button>
+        </router-link>
 		  </p>
       </form>
     </div>
@@ -83,7 +85,7 @@ export default {
   },
   methods: {
     post: function(){
-      this.$http.post('https://nots-eece8.firebaseio.com/tailors.json', this.tailor).then(function(data){
+      this.$http.post('https://nots-76611.firebaseio.com/tailors.json', this.tailor).then(function(data){
           console.log(data);
       });
     }

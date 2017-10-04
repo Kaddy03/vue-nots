@@ -15,10 +15,13 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <a id="ords" class="mdl-navigation__link" href="">All Orders</a>
+        <span id="currentNav" class="mdl-navigation__link" href="">All Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <a id="prods" class="mdl-navigation__link" href="">My Products</a>
+        <span class="mdl-navigation__link" href="">Ready-to-Wear's</span>
+      </router-link>
+      <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
+        <span class="mdl-navigation__link">My Product Types</span>
       </router-link>
     </nav>
   </div>
@@ -43,31 +46,47 @@
             </thead>
             <tbody>
               <tr v-for="order in orders">
-                <td class="mdl-data-table__cell--non-numeric">{{ order.Product_Type }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{ order.productType }}</td>
                 <td>
-                  <ul>
-                    <li>Bicep: {{ order.Measurements.Bicep }}</li>
-                    <li>Chest: {{ order.Measurements.Chest }}</li>
-                    <li>Neck: {{ order.Measurements.Neck }}</li>
-                    <li>Hips: {{ order.Measurements.Hips }}</li>
-                    <li>Shirt Length: {{ order.Measurements.Shirt_Length }}</li>
-                    <li>Shoulder Width: {{ order.Measurements.Shoulder_Width }}</li>
-                  </ul>
+                <button class="mdl-button mdl-js-button mdl-js-ripple-effect" v-on:click.prevent="showDialog">
+                  See Measurements
+                </button>
+                <dialog class="mdl-dialog" id="dialogBox">
+                  <h4 class="mdl-dialog__title">Customer's measurements</h4>
+                  <div class="mdl-dialog__content">
+                    {{ order.id }}
+                  </div>
+                  <div class="mdl-dialog__actions">
+                    <button id="add" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored">
+                      <i class="material-icons">done</i>
+                    </button>
+                  </div>
+                </dialog>
                 </td>
-                <td>{{ order.Quantity }}</td>
-                <td>{{ order.Tailor_Shops }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.tailorShops }}</td>
                 <td>
-                  <ul>
-                    <li>{{ order.Customer }}</li>
-                    <li>{{ order.School.Name_of_School }}</li>
-                    <li>{{ order.School.Level }}</li>
-                  </ul>
+                <button class="mdl-button mdl-js-button mdl-js-ripple-effect">
+                  See customer info
+                </button>
                 </td>
                 <td>
                   <button id="accept" class="mdl-button mdl-js-button mdl-button--icon">
                     <i class="material-icons">assignment_turned_in</i>
                   </button>
                 </td>
+                <!-- DIALOG FOR MEASUREMENTS -->
+                <dialog class="mdl-dialog" id="dialogBox">
+                  <h4 class="mdl-dialog__title">Customer's measurements</h4>
+                  <div class="mdl-dialog__content">
+                    {{ order.id }}
+                  </div>
+                  <div class="mdl-dialog__actions">
+                    <button id="add" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored">
+                      <i class="material-icons">done</i>
+                    </button>
+                  </div>
+                </dialog>
               </tr>
             </tbody>
           </table>
@@ -91,7 +110,9 @@ export default {
     }
   },
   methods: {
-
+    showDialog: function(){
+      dialog.showModal();
+    }
   },
   created() {
     this.$http.get('https://nots-76611.firebaseio.com/Orders.json').then(function(data){
@@ -101,9 +122,11 @@ export default {
         for (let key in data){
             data[key].id = key;
             ordersArray.push(data[key]);
+            console.log(Object.getOwnPropertyNames(data[key].measurements).sort());
         }
         this.orders = ordersArray;
     });
+
   }
 }
 
@@ -121,6 +144,9 @@ h5{
 li{
   text-align: left;
 }
+li, a{
+  text-decoration: none;
+}
 .mdl-data-table{
   width: 60px;
 }
@@ -136,7 +162,7 @@ li{
 .mdl-data-table{
   width: 100px;
 }
-#ords{
+#currentNav{
   background-color: #21C0C0;
   color: white;
 }

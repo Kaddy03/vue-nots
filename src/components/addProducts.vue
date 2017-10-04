@@ -14,10 +14,13 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <a id="ords" class="mdl-navigation__link" href="">All Orders</a>
+        <span class="mdl-navigation__link" href="">All Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <a id="prods" class="mdl-navigation__link" href="">My Products</a>
+        <span id="currentNav" class="mdl-navigation__link" href="">Ready-to-Wear's</span>
+      </router-link>
+      <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
+        <span class="mdl-navigation__link">My Product Types</span>
       </router-link>
     </nav>
   </div>
@@ -30,21 +33,21 @@
       <!-- SELECT BOXES -->
       <div class="mdl-grid">
             <p>
-            Select a type of Product
-            <select v-model="product.pType">
-              <option>Pants</option>
-              <option>Suit</option>
-              <option>Uniform</option>
-              <option>Shirt</option>
+            Select a Product Type
+            <select v-model="ready_to_wear.type">
+              <option v-for="type in types">{{ type.ptName }}</option>
             </select>
             </p>
             <p>
             Select a Size
-            <select v-model="product.pSize">
-              <option>S</option>
-              <option>M</option>
-              <option>L</option>
-              <option>XL</option>
+            <select v-model="ready_to_wear.size">
+              <option v-for="size in sizes">{{ size.sizeLetter }}</option>
+            </select>
+            </p>
+            <p>
+            Select a Fabric
+            <select v-model="ready_to_wear.fabric">
+              <option v-for="fabric in fabrics">{{ fabric.fabricName }}</option>
             </select>
             </p>
       </div>
@@ -52,40 +55,47 @@
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--4-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-    			     <input class="mdl-textfield__input" type="text" id="pFabric" v-model="product.pFabric">
-    			     <label class="mdl-textfield__label" for="tFabric">Type of Fabric</label>
+    			     <input class="mdl-textfield__input" type="text" id="rtwColor" v-model="ready_to_wear.rtwColor">
+    			     <label class="mdl-textfield__label" for="rtwColor">Color</label>
     		  </div>
         </div>
         <div class="mdl-cell mdl-cell--4-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-    			     <input class="mdl-textfield__input" type="text" id="pColor" v-model="product.pColor">
-    			     <label class="mdl-textfield__label" for="tColor">Color</label>
-    		  </div>
+            <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="rtwPrice" v-model="ready_to_wear.rtwPrice">
+            <label class="mdl-textfield__label" for="rtwPrice">Price</label>
+            <span class="mdl-textfield__error">Input is not a number!</span>
+          </div>
         </div>
-        <div class="mdl-cell mdl-cell--4-col"></div>
+        <div class="mdl-cell mdl-cell--4-col">
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="rtwStock" v-model="ready_to_wear.rtwStock">
+            <label class="mdl-textfield__label" for="rtwStock">Number of Stock</label>
+            <span class="mdl-textfield__error">Input is not a number!</span>
+          </div>
+        </div>
       </div>
       <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--4-col">
-          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="price" v-model="product.pPrice">
-            <label class="mdl-textfield__label" for="price">Price</label>
-            <span class="mdl-textfield__error">Input is not a number!</span>
-          </div>
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" v-on:click="onPickfile" accept="image/*">
+          Upload Image
+        </button>
+        <input type="file" style="display: none" ref="fileInput" v-on:change="onFilePicked">
+      </div>
+      <div class="mdl-grid">
+        <img :src="ready_to_wear.rtwImg" height="150">
+      </div>
+      <div class="mdl-grid">
+        <div id="txtfield" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+          <textarea class="mdl-textfield__input" type="text" rows= "10" id="rtwDescription" v-model="ready_to_wear.rtwDescription"></textarea>
+          <label class="mdl-textfield__label" for="rtwDescription">Description/Additional Details</label>
         </div>
-        <div class="mdl-cell mdl-cell--4-col">
-          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="stock" v-model="product.pStock">
-            <label class="mdl-textfield__label" for="stock">Number of Stocks</label>
-            <span class="mdl-textfield__error">Input is not a number!</span>
-          </div>
-        </div>
-        <div class="mdl-cell mdl-cell--4-col"></div>
       </div>
       <!-- SUBMIT BUTTON -->
       <div class="mdl-grid">
-        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="post">
-            <i class="material-icons">done_all</i> Add Product
-        </button>
+        <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="post">
+              <i class="material-icons">done_all</i> Add Product
+          </button>
+        </router-link>
       </div>
     </div>
   </main>
@@ -99,25 +109,112 @@ export default {
   data () {
     return {
       tailorId: this.$route.params.id,
-      product: {
-        pType: "",
-        pSize: "",
-        pFabric: "",
-        pColor: "",
-        pPrice: 0,
-        pStock: 0,
-        pReserved: 0,
-        pTailor: this.$route.params.id
+      fabrics: [],
+      sizes: [],
+      types: [],
+      tailors: [],
+      image: null,
+      ready_to_wear: {
+        rtwDescription: "",
+        rtwPrice: "",
+        rtwColor: "",
+        rtwStock: "",
+        rtwImg: "",
+        fabric: "",
+        size: "",
+        type: "",
+        tailor_id: this.$route.params.id
       }
-
     }
   },
   methods: {
     post: function(){
-      this.$http.post('https://nots-eece8.firebaseio.com/products.json', this.product).then(function(data){
-          console.log(data);
-      });
+      for(var i = 0; i < this.tailors.length; i++){
+       if(this.$route.params.id == this.tailors[i].id)
+         this.ready_to_wear.tailor_name = this.tailors[i].tName;
+      }
+      //this.$http.post('https://nots-76611.firebaseio.com/ready_to_wear.json', this.ready_to_wear);
+      let imageUrl
+      let key
+      this.$firebase.database().ref('ready_to_wears').push(this.ready_to_wear)
+        .then((data) => {
+          key = data.key
+          return key
+        })
+        .then(key => {
+          const filename = this.image.name
+          const ext = filename.slice(filename.lastIndexOf('.'))
+          return this.$firebase.storage().ref('rtws/' + key + '.' + ext).put(this.image)
+        })
+        .then(fileData => {
+          imageUrl = fileData.metadata.downloadURLs[0]
+          return this.$firebase.database().ref('ready_to_wears').child(key).update({rtwImg: imageUrl})
+        });
+    },
+    onPickfile: function(){
+      this.$refs.fileInput.click();
+    },
+    onFilePicked (event){
+      const files = event.target.files;
+      let filename = files[0].name;
+      if (filename.lastIndexOf('.') <= 0){
+        return alert('Please add a valid file!');
+      }
+      const fileReader = new FileReader();
+      fileReader.addEventListener('load', () => {
+        this.ready_to_wear.rtwImg = fileReader.result;
+      })
+      fileReader.readAsDataURL(files[0]);
+      this.image = files[0];
     }
+  },
+  created() {
+    //Retrieval for product types
+    this.$http.get('https://nots-76611.firebaseio.com/product_types.json').then(function(data){
+      return data.json();
+    }).then(function(data){
+      var ptArray = [];
+      for (let key in data){
+        if (this.$route.params.id == data[key].tailor){
+          data[key].id = key;
+          ptArray.push(data[key]);
+        }
+        this.types = ptArray;
+      }
+    });
+    //Retrieval for fabrics
+    this.$http.get('https://nots-76611.firebaseio.com/fabrics.json').then(function(data){
+      return data.json();
+    }).then(function(data){
+      var fabricArray = [];
+      for (let key in data){
+        data[key].id = key;
+        fabricArray.push(data[key]);
+      }
+      this.fabrics = fabricArray;
+    });
+    //Retrieval for sizes
+    this.$http.get('https://nots-76611.firebaseio.com/sizes.json').then(function(data){
+      return data.json();
+    }).then(function(data){
+      var sizeArray = [];
+      for (let key in data){
+        data[key].id = key;
+        sizeArray.push(data[key]);
+      }
+      this.sizes = sizeArray;
+    });
+    //Retrieval for tailor info
+    this.$http.get('https://nots-76611.firebaseio.com/tailors.json').then(function(data){
+      return data.json();
+    }).then(function(data){
+      var tailorArray = [];
+      for (let key in data){
+        data[key].id = key;
+        tailorArray.push(data[key]);
+      }
+      this.tailors = tailorArray;
+    });
   }
 }
 
@@ -134,6 +231,9 @@ h5{
 }
 p{
   margin-right: 20px;
+}
+li, a{
+  text-decoration: none;
 }
 .drawerHeader{
   background-color: #3f51b5;
@@ -157,10 +257,12 @@ p{
   height: auto;
   padding-left: 20px;
 }
-#prods{
+#currentNav{
   background-color: #21C0C0;
   color: white;
 }
-
+#txtfield{
+  width: 600px;
+}
 
 </style>

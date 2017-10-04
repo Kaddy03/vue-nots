@@ -15,10 +15,13 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <span id="ords" class="mdl-navigation__link">All Orders</span>
+        <span class="mdl-navigation__link">All Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span id="prods" class="mdl-navigation__link">My Products</span>
+        <span id="currentNav" class="mdl-navigation__link">Ready-to-Wear's</span>
+      </router-link>
+      <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
+        <span class="mdl-navigation__link">My Product Types</span>
       </router-link>
     </nav>
   </div>
@@ -26,48 +29,46 @@
   <main class="mdl-layout__content">
     <div class="page-content">
         <div class="mdl-grid">
-          <h5>My Products</h5>
+          <h5>Ready-to-Wear's</h5>
         </div>
         <div class="mdl-grid">
-            <router-link v-bind:to="'/nots/' + tailorId + '/products/addProducts'" exact>
+          <router-link v-bind:to="'/nots/' + tailorId + '/products/addProducts'" exact>
             <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored">
-              <i class="material-icons">add_circle</i> Add a Product
+              <i class="material-icons">add_circle</i> Add a RTW
             </button>
-            </router-link>
+          </router-link>
         </div>
         <div class="mdl-grid">
           <!-- PRODUCT LIST -->
-          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+          <table class="mdl-data-table mdl-js-data-table">
             <thead>
               <tr>
-                <th class="mdl-data-table__cell--non-numeric">Type</th>
-                <th>Size</th>
-                <th>Color</th>
-                <th>Fabric</th>
+                <th class="mdl-data-table__cell--non-numeric">Image</th>
+                <th class="mdl-data-table__cell--non-numeric">Product Type</th>
+                <th class="mdl-data-table__cell--non-numeric">Fabric</th>
+                <th class="mdl-data-table__cell--non-numeric">Size</th>
+                <th class="mdl-data-table__cell--non-numeric">Color</th>
                 <th>Price</th>
                 <th>Stock</th>
-                <th>Reserved</th>
                 <th></th>
               </tr>
             </thead>
-            <tbody>
-              <tr v-for="product in products">
-                <td class="mdl-data-table__cell--non-numeric">{{ product.pType }}</td>
-                <td>{{ product.pSize }}</td>
-                <td>{{ product.pColor }}</td>
-                <td>{{ product.pFabric }}</td>
-                <td>{{ product.pPrice }}</td>
-                <td>{{ product.pStock }}</td>
-                <td>{{ product.pReserved }}</td>
+              <tr v-for="rtw in rtws">
+                <td class="mdl-data-table__cell--non-numeric">
+                  <img :src="rtw.rtwImg" height="150">
+                </td>
+                <td class="mdl-data-table__cell--non-numeric">{{ rtw.type }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{ rtw.fabric }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{ rtw.size }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{ rtw.rtwColor }}</td>
+                <td>{{ rtw.rtwPrice }}php</td>
+                <td>{{ rtw.rtwStock }}</td>
                 <td>
-                  <button class="mdl-button mdl-js-button mdl-button--icon">
-                    <i class="material-icons">mode_edit</i>
-                  </button>
-                  <button class="mdl-button mdl-js-button mdl-button--icon">
-                    <i class="material-icons">delete</i>
-                  </button>
+                  <i class="material-icons">mode_edit</i>
+                  <i class="material-icons">delete</i>
                 </td>
               </tr>
+            <tbody>
             </tbody>
           </table>
         </div>
@@ -85,26 +86,66 @@ export default {
   data () {
     return {
       tailorId: this.$route.params.id,
-      products: [],
-      title: "Products",
-      prods: true
+      fabrics: [],
+      sizes: [],
+      types: [],
+      rtws: []
     }
   },
   methods: {
 
   },
   created() {
-    this.$http.get('https://nots-eece8.firebaseio.com/products.json').then(function(data){
-        return data.json()
+    //Retrieval for product types
+    this.$http.get('https://nots-76611.firebaseio.com/product_types.json').then(function(data){
+      return data.json();
     }).then(function(data){
-        var productsArray = [];
-        for (let key in data){
-            data[key].id = key;
-            productsArray.push(data[key]);
+      var ptArray = [];
+      for (let key in data){
+        if (this.$route.params.id == data[key].tailor){
+          data[key].id = key;
+          ptArray.push(data[key]);
         }
-        this.products = productsArray;
+        this.types = ptArray;
+      }
     });
-    console.log(this.products);
+    //Retrieval for fabrics
+    this.$http.get('https://nots-76611.firebaseio.com/fabrics.json').then(function(data){
+      return data.json();
+    }).then(function(data){
+      var fabricArray = [];
+      for (let key in data){
+        data[key].id = key;
+        fabricArray.push(data[key]);
+      }
+      this.fabrics = fabricArray;
+    });
+    //Retrieval for sizes
+    this.$http.get('https://nots-76611.firebaseio.com/sizes.json').then(function(data){
+      return data.json();
+    }).then(function(data){
+      var sizeArray = [];
+      for (let key in data){
+        data[key].id = key;
+        sizeArray.push(data[key]);
+      }
+      this.sizes = sizeArray;
+    });
+    //Retrieval for rtws
+    this.$http.get('https://nots-76611.firebaseio.com/ready_to_wears.json').then(function(data){
+      return data.json();
+    }).then(function(data){
+      var rtwArray = [];
+      for (let key in data){
+        if(this.$route.params.id == data[key].tailor_id){
+            data[key].id = key;
+            rtwArray.push(data[key]);
+        }
+      }
+      this.rtws = rtwArray;
+      console.log(this.rtws);
+    });
+
   }
 }
 
@@ -119,6 +160,9 @@ h5{
   padding: 10px;
   color: white;
 }
+li, a{
+  text-decoration: none;
+}
 .drawerHeader{
   background-color: #3f51b5;
   color: white;
@@ -128,7 +172,7 @@ h5{
 }
 .page-content{
 	background-color: white;
-  height: 650px;
+  height: auto;
   padding-left: 20px;
 }
 .mdl-data-table{
@@ -137,7 +181,7 @@ h5{
 .mdl-button{
   margin-left: 0;
 }
-#prods{
+#currentNav{
   background-color: #21C0C0;
   color: white;
 }

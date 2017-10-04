@@ -67,7 +67,7 @@ export default {
     }
   },
   created() {
-      this.$http.get('https://nots-eece8.firebaseio.com/tailors.json').then(function(data){
+      this.$http.get('https://nots-76611.firebaseio.com/tailors.json').then(function(data){
         return data.json();
       }).then(function(data){
         var usersArray = [];
