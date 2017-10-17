@@ -77,7 +77,15 @@ export default {
         }
         this.registeredUsers = usersArray;
       });
+      //COMPONENT UPGRADE
+      this.$nextTick(() => {
+        componentHandler.upgradeDom();
+        componentHandler.upgradeAllRegistered();
+      });
     },
+    mounted() {
+      var dialog = document.querySelector('dialog');
+    }
 }
 
 </script>
@@ -93,7 +101,7 @@ export default {
   margin: 70px auto;
 	padding: 30px;
 	border-radius: 20px;
-	background-color: #21C0C0;
+	background-color: white;
 	box-shadow: 0 4px 8px 8px rgba(0, 0, 0, 0.2), 0 6px 20px 20px rgba(0, 0, 0, 0.19);
 }
 .mdl-textfield__label{

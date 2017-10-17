@@ -89,6 +89,13 @@ export default {
           console.log(data);
       });
     }
+  },
+  created() {
+    //COMPONENT UPGRADE
+    this.$nextTick(() => {
+      componentHandler.upgradeDom();
+      componentHandler.upgradeAllRegistered();
+    });
   }
 }
 </script>
@@ -107,6 +114,9 @@ export default {
 }
 .mdl-button--colored{
   margin-left: 500px;
+}
+.mdl-layout__header{
+  background-color: #3f51b5;
 }
 form{
   width: 85%;

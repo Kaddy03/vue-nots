@@ -4,11 +4,11 @@
   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
   <!-- SIDE DRAWER -->
   <div class="mdl-layout__drawer">
-    <div class="drawerHeader mdl-layout-title">Tailor Name
+    <div class="drawerHeader mdl-layout-title"><h3>{{ tailorData.tName }}</h3>
     <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
         <i class="material-icons" role="presentation">account_circle</i>
     </button>
-    <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
+    <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
       <li disabled class="mdl-menu__item">Edit Profile</li>
       <router-link v-bind:to="'/nots'" exact><li class="mdl-menu__item">Logout</li></router-link>
     </ul>
@@ -22,6 +22,9 @@
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
         <span class="mdl-navigation__link">My Product Types</span>
+      </router-link>
+      <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
+        <span class="mdl-navigation__link">RTW reservations</span>
       </router-link>
     </nav>
   </div>
@@ -44,15 +47,30 @@
             <thead>
               <tr>
                 <th class="mdl-data-table__cell--non-numeric">Image</th>
-                <th class="mdl-data-table__cell--non-numeric">Product Type</th>
-                <th class="mdl-data-table__cell--non-numeric">Fabric</th>
-                <th class="mdl-data-table__cell--non-numeric">Size</th>
+                <th class="mdl-data-table__cell--non-numeric">
+                  Product Type
+                  <!-- PRODUCT TYPE FILTER -->
+                  <select>
+                    <option>All</option>
+                  </select>
+                </th>
+                <th class="mdl-data-table__cell--non-numeric">
+                  Fabric
+                </th>
+                <th class="mdl-data-table__cell--non-numeric">
+                  Size
+                  <!-- PRODUCT TYPE FILTER -->
+                  <select>
+                    <option>All</option>
+                  </select>
+                </th>
                 <th class="mdl-data-table__cell--non-numeric">Color</th>
                 <th>Price</th>
                 <th>Stock</th>
                 <th></th>
               </tr>
             </thead>
+            <tbody>
               <tr v-for="rtw in rtws">
                 <td class="mdl-data-table__cell--non-numeric">
                   <img :src="rtw.rtwImg" height="150">
@@ -64,11 +82,9 @@
                 <td>{{ rtw.rtwPrice }}php</td>
                 <td>{{ rtw.rtwStock }}</td>
                 <td>
-                  <i class="material-icons">mode_edit</i>
                   <i class="material-icons">delete</i>
                 </td>
               </tr>
-            <tbody>
             </tbody>
           </table>
         </div>
@@ -86,6 +102,7 @@ export default {
   data () {
     return {
       tailorId: this.$route.params.id,
+      tailorData: {},
       fabrics: [],
       sizes: [],
       types: [],
@@ -97,39 +114,15 @@ export default {
   },
   created() {
     //Retrieval for product types
-    this.$http.get('https://nots-76611.firebaseio.com/product_types.json').then(function(data){
+    this.$http.get('https://nots-76611.firebaseio.com/product_types/' + this.tailorId + '.json').then(function(data){
       return data.json();
     }).then(function(data){
       var ptArray = [];
       for (let key in data){
-        if (this.$route.params.id == data[key].tailor){
           data[key].id = key;
           ptArray.push(data[key]);
-        }
-        this.types = ptArray;
       }
-    });
-    //Retrieval for fabrics
-    this.$http.get('https://nots-76611.firebaseio.com/fabrics.json').then(function(data){
-      return data.json();
-    }).then(function(data){
-      var fabricArray = [];
-      for (let key in data){
-        data[key].id = key;
-        fabricArray.push(data[key]);
-      }
-      this.fabrics = fabricArray;
-    });
-    //Retrieval for sizes
-    this.$http.get('https://nots-76611.firebaseio.com/sizes.json').then(function(data){
-      return data.json();
-    }).then(function(data){
-      var sizeArray = [];
-      for (let key in data){
-        data[key].id = key;
-        sizeArray.push(data[key]);
-      }
-      this.sizes = sizeArray;
+      this.types = ptArray;
     });
     //Retrieval for rtws
     this.$http.get('https://nots-76611.firebaseio.com/ready_to_wears.json').then(function(data){
@@ -143,10 +136,19 @@ export default {
         }
       }
       this.rtws = rtwArray;
-      console.log(this.rtws);
     });
-
-  }
+    //RETRIEVE TAILOR DATA
+    this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json').then(function(data){
+        return data.json();
+    }).then(function(data){
+      this.tailorData = data;
+    });
+    //COMPONENT UPGRADE
+    this.$nextTick(() => {
+      componentHandler.upgradeDom();
+      componentHandler.upgradeAllRegistered();
+    });
+  },
 }
 
 </script>
@@ -167,19 +169,20 @@ li, a{
   background-color: #3f51b5;
   color: white;
 }
-.mdl-layout__content{
-  background-color: #808080;
-}
 .page-content{
 	background-color: white;
   height: auto;
   padding-left: 20px;
 }
 .mdl-data-table{
+  table-layout: fixed;
   width: 100%;
 }
 .mdl-button{
   margin-left: 0;
+}
+.mdl-textfield--expandable{
+  padding: 0px 0;
 }
 #currentNav{
   background-color: #21C0C0;

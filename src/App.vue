@@ -14,6 +14,7 @@ import products from './components/products.vue';
 import orders from './components/orders.vue';
 import addProducts from './components/addProducts.vue';
 import productTypes from './components/productTypes.vue';
+import reservations from './components/reservations.vue';
 
 export default {
   components: {
@@ -22,12 +23,9 @@ export default {
     'products': products,
     'orders': orders,
     'productTypes': productTypes,
-    'addProduct': addProducts
+    'addProduct': addProducts,
+    'reservations': reservations
   },
-
-  methods: {
-
-  }
 }
 
 </script>

@@ -3,11 +3,11 @@
   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
   <!-- SIDE DRAWER -->
   <div class="mdl-layout__drawer">
-    <div class="drawerHeader mdl-layout-title">Tailor Name
+    <div class="drawerHeader mdl-layout-title"><h3>{{ tailorData.tName }}</h3>
       <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
           <i class="material-icons" role="presentation">account_circle</i>
       </button>
-      <ul class="mdl-menu mdl-menu--bottom-right mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
+      <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
         <li disabled class="mdl-menu__item">Edit Profile</li>
         <router-link v-bind:to="'/nots'" exact><li class="mdl-menu__item">Logout</li></router-link>
       </ul>
@@ -22,6 +22,9 @@
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
         <span class="mdl-navigation__link">My Product Types</span>
       </router-link>
+      <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
+        <span class="mdl-navigation__link">RTW reservations</span>
+      </router-link>
     </nav>
   </div>
   <!-- MAIN CONTENT -->
@@ -30,6 +33,12 @@
       <div class="mdl-grid">
           <h5>Add a Product</h5>
       </div>
+      <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
+        <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored">
+           <i class="material-icons">keyboard_backspace</i>
+           Back to Login Page
+        </button>
+      </router-link>
       <!-- SELECT BOXES -->
       <div class="mdl-grid">
             <p>
@@ -91,11 +100,26 @@
       </div>
       <!-- SUBMIT BUTTON -->
       <div class="mdl-grid">
-        <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="post">
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="prompt">
               <i class="material-icons">done_all</i> Add Product
           </button>
-        </router-link>
+          <!-- PROMPT DIALOG -->
+          <dialog class="mdl-dialog">
+            <p class="mdl-dialog__title">Are you sure about the information you entered?</p>
+            <div class="mdl-dialog__content">
+              *The information you entered can't be edited later, after you posted
+            </div>
+            <div class="mdl-dialog__actions">
+              <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="post">
+                  YES
+                </button>
+              </router-link>
+              <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="closeDialog">
+                Back
+              </button>
+            </div>
+          </dialog>
       </div>
     </div>
   </main>
@@ -109,6 +133,7 @@ export default {
   data () {
     return {
       tailorId: this.$route.params.id,
+      tailorData: {},
       fabrics: [],
       sizes: [],
       types: [],
@@ -122,6 +147,7 @@ export default {
         rtwImg: "",
         fabric: "",
         size: "",
+        reserved: 0,
         type: "",
         tailor_id: this.$route.params.id
       }
@@ -129,11 +155,6 @@ export default {
   },
   methods: {
     post: function(){
-      for(var i = 0; i < this.tailors.length; i++){
-       if(this.$route.params.id == this.tailors[i].id)
-         this.ready_to_wear.tailor_name = this.tailors[i].tName;
-      }
-      //this.$http.post('https://nots-76611.firebaseio.com/ready_to_wear.json', this.ready_to_wear);
       let imageUrl
       let key
       this.$firebase.database().ref('ready_to_wears').push(this.ready_to_wear)
@@ -148,8 +169,15 @@ export default {
         })
         .then(fileData => {
           imageUrl = fileData.metadata.downloadURLs[0]
-          return this.$firebase.database().ref('ready_to_wears').child(key).update({rtwImg: imageUrl})
+          return this.$firebase.database().ref('ready_to_wears').child(key).update({rtwImg: imageUrl, rwtId: key, tailorName: this.tailorData.tName})
         });
+      alert("Product Added");
+    },
+    prompt: function(){
+      dialog.showModal();
+    },
+    closeDialog: function(){
+      dialog.close();
     },
     onPickfile: function(){
       this.$refs.fileInput.click();
@@ -170,17 +198,15 @@ export default {
   },
   created() {
     //Retrieval for product types
-    this.$http.get('https://nots-76611.firebaseio.com/product_types.json').then(function(data){
+    this.$http.get('https://nots-76611.firebaseio.com/product_types/' + this.tailorId + '.json').then(function(data){
       return data.json();
     }).then(function(data){
       var ptArray = [];
       for (let key in data){
-        if (this.$route.params.id == data[key].tailor){
           data[key].id = key;
           ptArray.push(data[key]);
-        }
-        this.types = ptArray;
       }
+      this.types = ptArray;
     });
     //Retrieval for fabrics
     this.$http.get('https://nots-76611.firebaseio.com/fabrics.json').then(function(data){
@@ -204,17 +230,23 @@ export default {
       }
       this.sizes = sizeArray;
     });
-    //Retrieval for tailor info
-    this.$http.get('https://nots-76611.firebaseio.com/tailors.json').then(function(data){
-      return data.json();
+    //RETRIEVE TAILOR DATA
+    this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json').then(function(data){
+        return data.json();
     }).then(function(data){
-      var tailorArray = [];
-      for (let key in data){
-        data[key].id = key;
-        tailorArray.push(data[key]);
-      }
-      this.tailors = tailorArray;
+      this.tailorData = data;
     });
+    //COMPONENT UPGRADE
+    this.$nextTick(() => {
+      componentHandler.upgradeDom();
+      componentHandler.upgradeAllRegistered();
+    });
+  },
+  mounted() {
+    var dialog = document.querySelector('dialog');
+    if (!dialog.showModal) {
+      dialogPolyfill.registerDialog(dialog);
+    }
   }
 }
 
@@ -234,6 +266,10 @@ p{
 }
 li, a{
   text-decoration: none;
+}
+dialog{
+  height: auto;
+  width: 40%;
 }
 .drawerHeader{
   background-color: #3f51b5;
@@ -256,6 +292,10 @@ li, a{
 	background-color: white;
   height: auto;
   padding-left: 20px;
+}
+.mdl-dialog__content{
+  font-size: 16pt;
+  color: red;
 }
 #currentNav{
   background-color: #21C0C0;

@@ -25,6 +25,6 @@ new Vue({
       databaseURL: 'https://nots-76611.firebaseio.com',
       projectId: 'nots-76611',
       storageBucket: 'gs://nots-76611.appspot.com'
-    })
+    });
   }
 })
