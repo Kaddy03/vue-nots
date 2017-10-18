@@ -10,7 +10,7 @@ export default [
   { path: '/nots', component: logIn },
   { path: '/nots/signup', component: signUp },
   { path: '/nots/:id/products', component: products },
-  { path: '/nots/:id/orders', component: orders },
+  { path: '/nots/:id/orders', name: 'orders', component: orders },
   { path: '/nots/:id/productTypes', component: productTypes },
   { path: '/nots/:id/reservations', component: reservations },
   { path: '/nots/:id/products/addProducts', component: addProducts }

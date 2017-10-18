@@ -16,48 +16,80 @@
         </div>
       </header>
       <!-- FORM -->
-      <form>
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-			     <input class="mdl-textfield__input" type="text" id="tName" v-model="tailor.tName">
-			     <label class="mdl-textfield__label" for="tName">Name of Tailor/Tailor Shop</label>
-		  </div>
-		  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-			     <input class="mdl-textfield__input" type="text" id="tAddress" v-model="tailor.tAddress">
-			     <label class="mdl-textfield__label" for="tAddress">Address of Tailor/Tailor Shop</label>
-		  </div>
-		  <div class="mdl-textfield mdl-js-textfield">
-			    <textarea class="mdl-textfield__input" type="text" rows= "3" id="tDesc" v-model="tailor.tDescription"></textarea>
-			    <label class="mdl-textfield__label" for="tDesc">Description</label>
-		  </div>
-		  <div class="mdl-textfield mdl-js-textfield">
-			    <textarea class="mdl-textfield__input" type="text" rows= "3" id="tContact" v-model="tailor.tContact"></textarea>
-			    <label class="mdl-textfield__label" for="tContact">Contact Details</label>
-		  </div>
-		  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-			    <input class="mdl-textfield__input" type="text" id="tUsername" v-model="tailor.tUsername">
-			    <label class="mdl-textfield__label" for="tUsername">Username</label>
-		  </div>
-		  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-			    <input class="mdl-textfield__input" type="password" id="tPassword" v-model="tailor.tPassword">
-			    <label class="mdl-textfield__label" for="tPassword">Password</label>
-		  </div>
-		  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" v-model="password2">
-			    <input class="mdl-textfield__input" type="password" id="tRePassword">
-			    <label class="mdl-textfield__label" for="tRePassword">Re-type Password</label>
-		  </div>
-      <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-			    <input class="mdl-textfield__input" type="text" id="tEmailAdd" v-model="tailor.tEmailAdd">
-			    <label class="mdl-textfield__label" for="tEmailAdd">Email Address</label>
-		  </div>
+      <form id="wholeForm">
+      <div class="mdl-grid">
+        <div id="tailorInfo" class="mdl-cell mdl-cell--6-col">
+          <legend>TAILOR INFORMATION: </legend>
+          <!-- IMAGE PREVIEW -->
+          <div id="imgPreview">
+            <img v-bind:src="tailor.tImage" height="300">
+          </div>
+          <!-- IMAGE UPLOAD -->
+          <div>
+            <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored" v-on:click.prevent="onPickfile" accept="image/*">
+              Upload Image of your store front
+            </button>
+            <input type="file" style="display: none" ref="fileInput" v-on:change="onFilePicked">
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+               <input class="mdl-textfield__input" type="text" id="tName" v-model="tailor.tName">
+               <label class="mdl-textfield__label" for="tName">Name of Tailor/Tailor Shop</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+               <input class="mdl-textfield__input" type="text" id="tAddress" v-model="tailor.tAddress">
+               <label class="mdl-textfield__label" for="tAddress">
+                 Address of Tailor/Tailor Shop<span class="hint"> (Pls Specify the exact location)</span>
+               </label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <textarea class="mdl-textfield__input" type="text" rows= "3" id="tDesc" v-model="tailor.tDescription">
+              </textarea>
+              <label class="mdl-textfield__label" for="tDesc">Services and MTO Offers</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    			    <input class="mdl-textfield__input" type="text" id="contact" pattern="[+0-9]{11,13}$" v-model="tailor.tContact">
+    			    <label class="mdl-textfield__label" for="contact">Contact Number</label>
+              <span class="mdl-textfield__error">Invalid number!</span>
+    		  </div>
+        </div>
+        <div id="acctInfo" class="mdl-cell mdl-cell--6-col">
+          <legend>ACCOUNT INFORMATION: </legend>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    			    <input class="mdl-textfield__input" type="text" id="tUsername" v-model="tailor.tUsername">
+    			    <label class="mdl-textfield__label" for="tUsername">Username</label>
+    		  </div>
+    		  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    			    <input class="mdl-textfield__input" type="password" id="tPassword" v-model="tailor.tPassword">
+    			    <label class="mdl-textfield__label" for="tPassword">Password</label>
+    		  </div>
+    		  <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    			    <input class="mdl-textfield__input" type="password" id="tRePassword" v-model="password2">
+    			    <label class="mdl-textfield__label" for="tRePassword">Re-type Password</label>
+    		  </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+    			    <input class="mdl-textfield__input" type="text" id="tEmailAdd" v-model="tailor.tEmailAdd" pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,3}$">
+    			    <label class="mdl-textfield__label" for="tEmailAdd">Email Address</label>
+              <span class="mdl-textfield__error">Invalid email!</span>
+    		  </div>
+        </div>
+      </div>
       <!-- SIGN UP CONTROLS -->
-      <p>
-		      <input type="checkbox"> I have read the the <a href="#">Terms and Conditions</a>
-          <router-link v-bind:to="'/nots'">
-		      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="post">
-			         <i class="material-icons">done_all</i> Sign Up
-		      </button>
-        </router-link>
-		  </p>
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--9-col">
+          <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-1">
+            <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input" v-model="accepted">
+            <span class="mdl-checkbox__label">I have read the <a v-on:click="test">Terms and Conditions</a></span>
+          </label>
+        </div>
+        <div class="mdl-cell mdl-cell--3-col">
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" v-if="accepted" v-on:click.prevent="post">
+            <i class="material-icons">done_all</i> Sign Up
+          </button>
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" v-else disabled>
+            <i class="material-icons">done_all</i> Sign Up
+          </button>
+        </div>
+      </div>
       </form>
     </div>
     <!-- END TEMPLATE -->
@@ -70,6 +102,8 @@
 export default {
   data () {
     return {
+      regTailors: [],
+      image: null,
       tailor: {
         tName: "",
         tAddress: "",
@@ -77,7 +111,8 @@ export default {
         tContact: "",
         tUsername: "",
         tPassword: "",
-        tEmailAdd: ""
+        tEmailAdd: "",
+        tImage: ""
       },
       password2: "",
       accepted: false
@@ -85,9 +120,61 @@ export default {
   },
   methods: {
     post: function(){
-      this.$http.post('https://nots-76611.firebaseio.com/tailors.json', this.tailor).then(function(data){
-          console.log(data);
-      });
+      console.log(this.isUnique);
+      if (!this.entryComplete){
+        alert("PLEASE FILL ALL THE ASKED INPUT!");
+      }
+      else if (!this.passwordConfirmed){
+        alert("YOUR PASSWORD DOESN'T MATCH!");
+      }
+      else{
+        console.log("okay");
+      }
+      //this.$http.post('https://nots-76611.firebaseio.com/tailors.json', this.tailor)
+    },
+    test: function(){
+      console.log("terms");
+    },
+    onPickfile: function(){
+      this.$refs.fileInput.click();
+    },
+    onFilePicked (event){
+      const files = event.target.files;
+      let filename = files[0].name;
+      if (filename.lastIndexOf('.') <= 0){
+        return alert('Please add a valid file!');
+      }
+      const fileReader = new FileReader();
+      fileReader.addEventListener('load', () => {
+        this.tailor.tImage = fileReader.result;
+      })
+      fileReader.readAsDataURL(files[0]);
+      this.image = files[0];
+    }
+  },
+  computed: {
+    passwordConfirmed: function(){
+      return (this.tailor.tPassword == this.password2);
+    },
+    entryComplete: function(){
+      return (
+        (this.tailor.tName != "") &&
+        (this.tailor.tAddress != "") &&
+        (this.tailor.tDescription != "") &&
+        (this.tailor.tContact != "") &&
+        (this.tailor.tUsername != "") &&
+        (this.tailor.tPassword != "") &&
+        (this.tailor.tEmailAdd != "") &&
+        (this.image != null)
+      );
+    },
+    isUnique: function(){
+      for (var i = 0; i < this.regTailors.length; i++) {
+        if((this.tailor.tUsername!=this.regTailors[i].tUsername) && (this.tailor.tPassword!=this.regTailors[i].tPassword))
+         return true;
+        else
+         return false;
+      }
     }
   },
   created() {
@@ -95,6 +182,17 @@ export default {
     this.$nextTick(() => {
       componentHandler.upgradeDom();
       componentHandler.upgradeAllRegistered();
+    });
+    //RETRIEVE REGISTERED TAILORS
+    this.$http.get('https://nots-76611.firebaseio.com/tailors.json').then(function(data){
+      return data.json();
+    }).then(function(data){
+      var usersArray = [];
+      for (let key in data){
+          data[key].id = key;
+          usersArray.push(data[key]);
+      }
+      this.regTailors = usersArray;
     });
   }
 }
@@ -112,21 +210,29 @@ export default {
 .signUp{
   background-color: #E0E0E0;
 }
-.mdl-button--colored{
-  margin-left: 500px;
-}
 .mdl-layout__header{
   background-color: #3f51b5;
 }
-form{
+.hint{
+  font-size: 8pt;
+  color: red;
+}
+#tailorInfo, #acctInfo{
+  padding: 20px;
+  border-style: groove;
+  border-radius: 5%;
+}
+#wholeForm{
   width: 85%;
-  padding-left: 50px;
+  height: auto;
+  padding: 30px;
 	margin: auto;
 	box-shadow: 0 4px 8px 8px rgba(0, 0, 0, 0.2), 0 6px 20px 20px rgba(0, 0, 0, 0.19);
 	background-color: #E0E0E0;
 }
-p{
-  margin-top: 60px;
+#imgPreview{
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
 
 </style>

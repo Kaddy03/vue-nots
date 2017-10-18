@@ -18,11 +18,9 @@
 			                 <input class="mdl-textfield__input" type="password" id="loginPword" v-model="password">
 			                 <label class="mdl-textfield__label" for="loginPword">Password</label>
 		              </div>
-                  <router-link v-bind:to="'/nots/' + currentUser + '/orders'" exact>
-		              <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" v-on:click="signIn">
+		              <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="signIn">
 			                 <i class="material-icons">forward</i>Login
 		              </button>
-                  </router-link>
 		          </form>
 		          <p>Don't have account yet? <router-link v-bind:to="'/nots/signup'" exact>Sign up now!</router-link></p>
 	        </div>
@@ -64,9 +62,17 @@ export default {
         if((this.username==this.registeredUsers[i].tUsername) && (this.password==this.registeredUsers[i].tPassword))
          this.currentUser = this.registeredUsers[i].id;
       }
+      if (this.currentUser == ""){
+        alert("INCORRECT USERNAME OR PASSWORD!");
+        return;
+      }
+      else{
+        this.$router.push({ name: 'orders', params: { id: this.currentUser }});
+      }
     }
   },
   created() {
+      //RETRIEVE REGISTERED TAILORS
       this.$http.get('https://nots-76611.firebaseio.com/tailors.json').then(function(data){
         return data.json();
       }).then(function(data){

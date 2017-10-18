@@ -17,7 +17,7 @@
         <span class="mdl-navigation__link" href="">All Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span id="currentNav" class="mdl-navigation__link" href="">Ready-to-Wear's</span>
+        <span id="currentNav" class="mdl-navigation__link" href="">Ready-to-Wears</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
         <span class="mdl-navigation__link">My Product Types</span>
@@ -31,7 +31,7 @@
   <main class="mdl-layout__content">
     <div class="page-content">
       <div class="mdl-grid">
-          <h5>Add a Product</h5>
+          <h5>Ready-to-Wears | Add a RTW Product</h5>
       </div>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
         <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored">
@@ -83,13 +83,15 @@
           </div>
         </div>
       </div>
-      <div class="mdl-grid">
+      <!-- IMAGE UPLOAD -->
+      <div>
         <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" v-on:click="onPickfile" accept="image/*">
           Upload Image
         </button>
         <input type="file" style="display: none" ref="fileInput" v-on:change="onFilePicked">
       </div>
-      <div class="mdl-grid">
+      <!-- IMAGE PREVIEW -->
+      <div id="imgPreview">
         <img :src="ready_to_wear.rtwImg" height="150">
       </div>
       <div class="mdl-grid">
@@ -303,6 +305,9 @@ dialog{
 }
 #txtfield{
   width: 600px;
+}
+#imgPreview{
+  margin-top: 10px;
 }
 
 </style>
