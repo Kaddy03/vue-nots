@@ -18,7 +18,7 @@
         <span class="mdl-navigation__link">All Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span id="currentNav" class="mdl-navigation__link">Ready-to-Wear's</span>
+        <span id="currentNav" class="mdl-navigation__link">Ready-to-Wears</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
         <span class="mdl-navigation__link">My Product Types</span>

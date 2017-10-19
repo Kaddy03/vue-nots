@@ -79,7 +79,7 @@
                   </button>
                 </div>
               </dialog>
-              <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showReject(ndx)">
+              <button id="reject" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showReject(ndx)">
                 <i class="material-icons">block</i>
               </button>
               <!-- DIALOG FOR REJECT -->
