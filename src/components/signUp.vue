@@ -78,7 +78,7 @@
         <div class="mdl-cell mdl-cell--9-col">
           <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-1">
             <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input" v-model="accepted">
-            <span class="mdl-checkbox__label">I have read the <a v-on:click="test">Terms and Conditions</a></span>
+            <span class="mdl-checkbox__label">I have read the <a>Terms and Conditions</a></span>
           </label>
         </div>
         <div class="mdl-cell mdl-cell--3-col">
@@ -120,20 +120,35 @@ export default {
   },
   methods: {
     post: function(){
-      console.log(this.isUnique);
+      let imageUrl
+      let key
       if (!this.entryComplete){
         alert("PLEASE FILL ALL THE ASKED INPUT!");
       }
       else if (!this.passwordConfirmed){
         alert("YOUR PASSWORD DOESN'T MATCH!");
       }
-      else{
-        console.log("okay");
+      else if (!this.isUnique){
+        alert("YOUR USERNAME OR PASSWORD IS ALREADY TAKEN!");
       }
-      //this.$http.post('https://nots-76611.firebaseio.com/tailors.json', this.tailor)
-    },
-    test: function(){
-      console.log("terms");
+      else{
+        this.$firebase.database().ref('tailors').push(this.tailor)
+          .then((data) => {
+            key = data.key
+            return key
+          })
+          .then(key => {
+            const filename = this.image.name
+            const ext = filename.slice(filename.lastIndexOf('.'))
+            return this.$firebase.storage().ref('tailors/' + key + '.' + ext).put(this.image)
+          })
+          .then(fileData => {
+            imageUrl = fileData.metadata.downloadURLs[0]
+            return this.$firebase.database().ref('tailors').child(key).update({tImage: imageUrl, tId: key})
+          });
+        alert("Sign Up Succesful!");
+        this.$router.push({ path: '/nots' });
+      }
     },
     onPickfile: function(){
       this.$refs.fileInput.click();
@@ -169,12 +184,16 @@ export default {
       );
     },
     isUnique: function(){
+      let result;
       for (var i = 0; i < this.regTailors.length; i++) {
         if((this.tailor.tUsername!=this.regTailors[i].tUsername) && (this.tailor.tPassword!=this.regTailors[i].tPassword))
-         return true;
-        else
-         return false;
+         result = true;
+        else{
+         result = false;
+         break;
+        }
       }
+      return result;
     }
   },
   created() {

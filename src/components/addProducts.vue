@@ -200,13 +200,15 @@ export default {
   },
   created() {
     //Retrieval for product types
-    this.$http.get('https://nots-76611.firebaseio.com/product_types/' + this.tailorId + '.json').then(function(data){
+    this.$http.get('https://nots-76611.firebaseio.com/product_types.json').then(function(data){
       return data.json();
     }).then(function(data){
       var ptArray = [];
       for (let key in data){
+        if(this.$route.params.id == data[key].tailor){
           data[key].id = key;
           ptArray.push(data[key]);
+        }
       }
       this.types = ptArray;
     });

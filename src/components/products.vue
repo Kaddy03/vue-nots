@@ -41,6 +41,11 @@
             </button>
           </router-link>
         </div>
+        <!-- SEARCH FOR TYPE -->
+        <div id="searchField">
+          Search by Product Type:
+          <input type="text" v-model="search">
+        </div>
         <div class="mdl-grid">
           <!-- PRODUCT LIST -->
           <table class="mdl-data-table mdl-js-data-table">
@@ -49,36 +54,39 @@
                 <th class="mdl-data-table__cell--non-numeric">Image</th>
                 <th class="mdl-data-table__cell--non-numeric">
                   Product Type
-                  <!-- PRODUCT TYPE FILTER -->
-                  <select>
-                    <option>All</option>
-                  </select>
                 </th>
                 <th class="mdl-data-table__cell--non-numeric">
                   Fabric
                 </th>
                 <th class="mdl-data-table__cell--non-numeric">
                   Size
-                  <!-- PRODUCT TYPE FILTER -->
-                  <select>
-                    <option>All</option>
+                  <!-- SIZE FILTER -->
+                  <select v-model="sizeSearch">
+                    <option></option>
+                    <option>XXXS</option>
+                    <option>XXS</option>
+                    <option>XS</option>
+                    <option>S</option>
+                    <option>M</option>
+                    <option>L</option>
+                    <option>XL</option>
+                    <option>XXL</option>
+                    <option>XXXL</option>
                   </select>
                 </th>
-                <th class="mdl-data-table__cell--non-numeric">Color</th>
                 <th>Price</th>
                 <th>Stock</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="rtw in rtws">
+              <tr v-for="rtw in filteredProds">
                 <td class="mdl-data-table__cell--non-numeric">
                   <img :src="rtw.rtwImg" height="150">
                 </td>
                 <td class="mdl-data-table__cell--non-numeric">{{ rtw.type }}</td>
                 <td class="mdl-data-table__cell--non-numeric">{{ rtw.fabric }}</td>
                 <td class="mdl-data-table__cell--non-numeric">{{ rtw.size }}</td>
-                <td class="mdl-data-table__cell--non-numeric">{{ rtw.rtwColor }}</td>
                 <td>{{ rtw.rtwPrice }}php</td>
                 <td>{{ rtw.rtwStock }}</td>
                 <td>
@@ -101,6 +109,8 @@
 export default {
   data () {
     return {
+      search: '',
+      sizeSearch: '',
       tailorId: this.$route.params.id,
       tailorData: {},
       fabrics: [],
@@ -111,6 +121,16 @@ export default {
   },
   methods: {
 
+  },
+  computed: {
+    filteredProds: function(){
+      return this.rtws.filter((rtw) =>{
+        return (
+          rtw.type.toLowerCase().includes(this.search.toLowerCase()) &&
+          rtw.size.includes(this.sizeSearch)
+        );
+      });
+    }
   },
   created() {
     //Retrieval for product types
@@ -188,6 +208,9 @@ li, a{
   background-color: #21C0C0;
   color: white;
 }
-
+#searchField{
+  margin-top: 10px;
+  margin-left: 10px;
+}
 
 </style>
