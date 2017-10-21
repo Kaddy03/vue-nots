@@ -1,4 +1,7 @@
 <template>
+  <div>
+    <!-- BEGIN TEMPLATE -->
+    <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
     <!-- BEGIN TEMPLATE -->
   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
     <header class="mdl-layout__header">
@@ -71,7 +74,15 @@
             <p>
             Select a Size
             <select v-model="ready_to_wear.size">
-              <option v-for="size in sizes">{{ size.sizeLetter }}</option>
+              <option>XXXS</option>
+              <option>XXS</option>
+              <option>XS</option>
+              <option>S</option>
+              <option>M</option>
+              <option>L</option>
+              <option>XL</option>
+              <option>XXL</option>
+              <option>XXXL</option>
             </select>
             </p>
       </div>
@@ -123,17 +134,18 @@
       </div>
       <!-- SUBMIT BUTTON -->
       <div class="mdl-grid">
-          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="prompt">
+          <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="prompt">
               <i class="material-icons">done_all</i> Add Product
           </button>
           <!-- PROMPT DIALOG -->
-          <dialog class="mdl-dialog">
+          <dialog ref="promptDialog" class="mdl-dialog">
             <p class="mdl-dialog__title">Are you sure about the information you entered?</p>
             <div class="mdl-dialog__content">
-              *The information you entered can't be edited later, after you posted
+              *The information (except the Stock) you entered can't be edited later, after you posted
             </div>
             <div class="mdl-dialog__actions">
-                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="post">
+                <div v-if="isPosting" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
+                <button v-else class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="post">
                   YES
                 </button>
               <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="closeDialog">
@@ -145,6 +157,8 @@
     </div>
   </main>
 </div>
+<!-- END TEMPLATE -->
+</div>
 </template>
 
 <!-- SCRIPT -->
@@ -153,10 +167,10 @@
 export default {
   data () {
     return {
+      isPosting: false,
+      isLoading: true,
       tailorId: this.$route.params.id,
       tailorData: {},
-      fabrics: [],
-      sizes: [],
       types: [],
       tailors: [],
       image: null,
@@ -179,31 +193,37 @@ export default {
     post: function(){
       let imageUrl
       let key
+      let tailorId = this.$route.params.id
       let goTo = this.$router
+      this.isPosting = true
       this.$firebase.database().ref('ready_to_wears').push(this.ready_to_wear)
         .then((data) => {
           key = data.key
           return key
+          console.log("1st then")
         })
         .then(key => {
           const filename = this.image.name
           const ext = filename.slice(filename.lastIndexOf('.'))
           return this.$firebase.storage().ref('rtws/' + key + '.' + ext).put(this.image)
+          console.log("2nd then")
         })
         .then(fileData => {
           imageUrl = fileData.metadata.downloadURLs[0]
           return this.$firebase.database().ref('ready_to_wears').child(key).update({rtwImg: imageUrl, rwtId: key, tailorName: this.tailorData.tName})
+          console.log("3rd then")
         }).then(function(){
           alert("Product Added");
         }).then(function(){
-          goTo.push({ name: 'rtws', params: { id: this.$route.params.id }});
+          goTo.push({ name: 'rtws', params: { id: tailorId }});
+          console.log("4th then")
         });
     },
     prompt: function(){
-      dialog.showModal();
+      this.$refs.promptDialog.showModal();
     },
     closeDialog: function(){
-      dialog.close();
+      this.$refs.promptDialog.close();
     },
     onPickfile: function(){
       this.$refs.fileInput.click();
@@ -222,6 +242,12 @@ export default {
       this.image = files[0];
     }
   },
+  beforeCreate() {
+    this.$nextTick(() => {
+      componentHandler.upgradeDom();
+      componentHandler.upgradeAllRegistered();
+    });
+  },
   created() {
     //Retrieval for product types
     this.$http.get('https://nots-76611.firebaseio.com/product_types.json').then(function(data){
@@ -235,44 +261,19 @@ export default {
         }
       }
       this.types = ptArray;
-    });
-    //Retrieval for fabrics
-    this.$http.get('https://nots-76611.firebaseio.com/fabrics.json').then(function(data){
-      return data.json();
+    }).then(function(){
+      return this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json')
     }).then(function(data){
-      var fabricArray = [];
-      for (let key in data){
-        data[key].id = key;
-        fabricArray.push(data[key]);
-      }
-      this.fabrics = fabricArray;
-    });
-    //Retrieval for sizes
-    this.$http.get('https://nots-76611.firebaseio.com/sizes.json').then(function(data){
-      return data.json();
-    }).then(function(data){
-      var sizeArray = [];
-      for (let key in data){
-        data[key].id = key;
-        sizeArray.push(data[key]);
-      }
-      this.sizes = sizeArray;
-    });
-    //RETRIEVE TAILOR DATA
-    this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json').then(function(data){
       return data.json();
     }).then(function(data){
       this.tailorData = data;
       this.ready_to_wear.tailorName = data.tName;
-    });
-    //COMPONENT UPGRADE
-    this.$nextTick(() => {
-      componentHandler.upgradeDom();
-      componentHandler.upgradeAllRegistered();
+    }).then(function(){
+      this.isLoading = false;
     });
   },
   mounted() {
-    var dialog = document.querySelector('dialog');
+    var dialog = document.querySelectorAll('dialog');
   }
 }
 
@@ -314,6 +315,9 @@ dialog{
 }
 .mdl-textfield{
   margin-left: 0;
+}
+.mdl-js-progress{
+  width: 100%;
 }
 .page-content{
 	background-color: white;
