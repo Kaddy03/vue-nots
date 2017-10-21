@@ -3,16 +3,33 @@
     <!-- BEGIN TEMPLATE -->
   <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+    <header class="mdl-layout__header">
+      <div class="mdl-layout__header-row">
+        <h3>Welcome To Naga Online Tailoring Services</h3>
+        <div class="mdl-layout-spacer"></div>
+        <div>
+        <button id="logout" class="mdl-button mdl-js-button mdl-js-ripple-effect">
+           <i class="material-icons">power_settings_new</i>
+           Logout
+        </button>
+        </div>
+      </div>
+    </header>
   <!-- SIDE DRAWER -->
   <div class="mdl-layout__drawer">
-    <div class="drawerHeader mdl-layout-title"><h3>{{ tailorData.tName }}</h3>
-      <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
-          <i class="material-icons" role="presentation">account_circle</i>
-      </button>
-      <ul class="mdl-menu mdl-menu--bottom-left mdl-js-menu mdl-js-ripple-effect" for="demo-menu-lower-right">
-        <li disabled class="mdl-menu__item">Edit Profile</li>
-        <router-link v-bind:to="'/nots'" exact><li class="mdl-menu__item">Logout</li></router-link>
-      </ul>
+    <div class="drawerHeader mdl-layout-title">
+      <div>
+        <img id="tailorAvatar" :src="tailorData.tImage" height="100">
+      </div>
+      <h3>{{ tailorData.tName }}</h3>
+      <p>
+        My Profile
+        <router-link v-bind:to="'/nots/' + tailorId + '/viewProfile'" exact>
+          <button id="demo-menu-lower-right" class="mdl-button mdl-js-button mdl-button--icon">
+              <i class="material-icons" role="presentation">account_circle</i>
+          </button>
+        </router-link>
+      </p>
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
@@ -231,6 +248,7 @@ li{
 }
 li, a{
   text-decoration: none;
+  color: white;
 }
 dialog{
   height: auto;
@@ -254,6 +272,20 @@ dialog{
 }
 .mdl-dialog__content{
   font-size: 14pt;
+}
+.mdl-layout__header{
+  background-color: #21C0C0;
+}
+#tailorAvatar {
+  margin-top: 30px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border-style: solid;
+  border-width: 5px;
+}
+#logout {
+  color: white;
 }
 #currentNav{
   background-color: #21C0C0;
