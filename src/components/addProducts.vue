@@ -6,10 +6,12 @@
         <h3>Welcome To Naga Online Tailoring Services</h3>
         <div class="mdl-layout-spacer"></div>
         <div>
-        <button id="logout" class="mdl-button mdl-js-button mdl-js-ripple-effect">
-           <i class="material-icons">power_settings_new</i>
-           Logout
-        </button>
+        <router-link v-bind:to="'/nots/'" exact>
+          <button id="logout" class="mdl-button mdl-js-button mdl-js-ripple-effect">
+             <i class="material-icons">power_settings_new</i>
+             Logout
+          </button>
+        </router-link>
         </div>
       </div>
     </header>
@@ -83,14 +85,14 @@
         </div>
         <div class="mdl-cell mdl-cell--3-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="rtwPrice" v-model="ready_to_wear.rtwPrice">
+            <input class="mdl-textfield__input" type="text" pattern="-?[0-9,]*(\.[0-9,]+)?" id="rtwPrice" v-model="ready_to_wear.rtwPrice">
             <label class="mdl-textfield__label" for="rtwPrice">Price</label>
             <span class="mdl-textfield__error">Input is not a number!</span>
           </div>
         </div>
         <div class="mdl-cell mdl-cell--3-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="rtwStock" v-model="ready_to_wear.rtwStock">
+            <input class="mdl-textfield__input" type="text" pattern="-?[0-9,]*(\.[0-9,]+)?" id="rtwStock" v-model="ready_to_wear.rtwStock">
             <label class="mdl-textfield__label" for="rtwStock">Number of Stock</label>
             <span class="mdl-textfield__error">Input is not a number!</span>
           </div>
@@ -168,6 +170,7 @@ export default {
         size: "",
         reserved: 0,
         type: "",
+        tailorName: "",
         tailor_id: this.$route.params.id
       }
     }
@@ -257,9 +260,10 @@ export default {
     });
     //RETRIEVE TAILOR DATA
     this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json').then(function(data){
-        return data.json();
+      return data.json();
     }).then(function(data){
       this.tailorData = data;
+      this.ready_to_wear.tailorName = data.tName;
     });
     //COMPONENT UPGRADE
     this.$nextTick(() => {

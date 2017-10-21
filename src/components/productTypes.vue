@@ -8,10 +8,12 @@
         <h3>Welcome To Naga Online Tailoring Services</h3>
         <div class="mdl-layout-spacer"></div>
         <div>
-        <button id="logout" class="mdl-button mdl-js-button mdl-js-ripple-effect">
-           <i class="material-icons">power_settings_new</i>
-           Logout
-        </button>
+        <router-link v-bind:to="'/nots/'">
+          <button id="logout" class="mdl-button mdl-js-button mdl-js-ripple-effect">
+             <i class="material-icons">power_settings_new</i>
+             Logout
+          </button>
+        </router-link>
         </div>
       </div>
     </header>
@@ -64,6 +66,10 @@
                       <input class="mdl-textfield__input" type="text" id="pType" v-model="pType.ptName">
                       <label class="mdl-textfield__label" for="pType">Product Type Name <span class="hint">(Pls Specify the GENDER for this type)</span></label>
                 </div>
+                <div id="ptNameInput" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                      <input class="mdl-textfield__input" type="text" id="pType" v-model="pType.ptPrice">
+                      <label class="mdl-textfield__label" for="pType">Estimated Price for MTO</label>
+                </div>
                 <p>*Choose the required MTO measurements for this product type</p>
                 <!-- CHECKBOXES -->
                 <div class="mdl-grid">
@@ -72,7 +78,7 @@
                     <p>FOR UPPER GARMENTS</p>
                     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="armhole">
                       <input type="checkbox" id="armhole" class="mdl-checkbox__input" v-model="pType.arm_hole">
-                      <span class="mdl-checkbox__label">Arm Hole = {{ pType.arm_hole }}</span>
+                      <span class="mdl-checkbox__label">Arm Hole</span>
                     </label>
                     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="bicep">
                       <input type="checkbox" id="bicep" class="mdl-checkbox__input" v-model="pType.bicep">
@@ -171,7 +177,8 @@
               </div>
               <!-- ACTION BUTTONS -->
               <div class="mdl-dialog__actions">
-                <button id="add" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="post">
+                <div v-if="isPosting" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
+                <button v-else id="add" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="post">
                   <i class="material-icons">done</i>
                 </button>
                 <span for="add" class="mdl-tooltip">Add product type</span>
@@ -188,6 +195,7 @@
             <thead>
               <th class="mdl-data-table__cell--non-numeric">Product Type Names</th>
               <th>Measurements for MTO</th>
+              <th class="mdl-data-table__cell--non-numeric">Estimated price for MTO</th>
               <th></th>
             </thead>
             <tbody>
@@ -238,6 +246,7 @@
                     </div>
                   </dialog>
                 </td>
+                <td class="mdl-data-table__cell--non-numeric">{{ type.ptPrice }}php</td>
                 <td>
                   <button id="edit" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showEdit(ndx)">
                     <i class="material-icons">mode_edit</i>
@@ -247,7 +256,8 @@
                     <p class="mdl-dialog__title">Edit this Product Type</p>
                     <div class="mdl-dialog__content">
                       <div>
-                           Edit Product Name: <input type="text" v-model="type.ptName">
+                           <p>Edit Product Name: <input type="text" v-model="type.ptName"></p>
+                           <p>Edit Estimated Price for MTO: <input type="text" v-model="type.ptPrice"></p>
                       </div>
                       <!-- CHECKBOXES FOR MEASUREMENTS -->
                       <div class="mdl-grid">
@@ -286,7 +296,8 @@
                       </div>
                       <p class="hint">(Changes will not affect previous RTWs, RTW reservations, and MTO orders<br>that involves this product type)</p>
                       <div class="mdl-dialog__actions">
-                        <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="edit(ndx, type.id, type)">
+                        <div v-if="isEditing" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
+                        <button v-else class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="edit(ndx, type.id, type)">
                           <i class="material-icons">done</i>
                         </button>
                         <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click="closeEdit(ndx)">
@@ -305,7 +316,8 @@
                       This product type will still exist in previous RTWs, RTW reservations, and MTO orders.
                     </div>
                     <div class="mdl-dialog__actions">
-                      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click.prevent="ptDelete(ndx, type.id)">
+                      <div v-if="isDeleting" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
+                      <button v-else class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click.prevent="ptDelete(type.id)">
                         Delete
                       </button>
                       <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeDelete(ndx)">
@@ -331,7 +343,10 @@
 export default {
   data () {
     return {
+      isEditing: false,
+      isDeleting: false,
       isLoading: true,
+      isPosting: false,
       tailorId: this.$route.params.id,
       tailorData: {},
       pType: {
@@ -359,6 +374,7 @@ export default {
         inseam: false,
         knee: false,
         half_hem: false,
+        ptPrice: "",
         tailor: this.$route.params.id
       },
       types: []
@@ -369,8 +385,8 @@ export default {
       this.$refs.addDialog.showModal();
     },
     post: function(){
+      this.isPosting = true
       this.$http.post('https://nots-76611.firebaseio.com/product_types.json', this.pType).then(function(){
-        this.$refs.addDialog.close();
         alert("Product Type Added");
       }).then(function(){
         location.reload();
@@ -378,17 +394,14 @@ export default {
     },
     edit: function(diag, id, data){
       let diaBox = this.$refs.editDialog[diag];
+      this.isEditing = true;
       this.$firebase.database().ref('product_types').child(id).update(data).then(function(){
         diaBox.close();
-        alert("Product Type Edited");
-      });
+      })
     },
-    ptDelete: function(diag, id){
-      let diaBox = this.$refs.deleteDialog[diag];
+    ptDelete: function(id){
+      this.isDeleting = true;
       this.$firebase.database().ref('product_types').child(id).remove().then(function(){
-        diaBox.close();
-        alert("Product Type Deleted");
-      }).then(function(){
         location.reload();
       });
     },
@@ -414,6 +427,12 @@ export default {
       this.$refs.measureDialog[diag].close();
     }
   },
+  beforeCreate() {
+    this.$nextTick(() => {
+      componentHandler.upgradeDom();
+      componentHandler.upgradeAllRegistered();
+    });
+  },
   created() {
     //Retrieval for product types
     this.$http.get('https://nots-76611.firebaseio.com/product_types.json').then(function(data){
@@ -428,19 +447,14 @@ export default {
       }
       this.types = ptArray.reverse();
     }).then(function(){ //RETRIEVAL FOR TAILOR DATA
-      return this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json');
+      return this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.$route.params.id + '.json');
     }).then(function(data){
       return data.json();
     }).then(function(data){
       this.tailorData = data;
     }).then(function(){
       this.isLoading = false;
-    });
-    //COMPONENT UPGRADE
-    this.$nextTick(() => {
-      componentHandler.upgradeDom();
-      componentHandler.upgradeAllRegistered();
-    });
+    })
   },
   mounted() {
     var dialog = document.querySelectorAll('dialog');

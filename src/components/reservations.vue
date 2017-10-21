@@ -8,10 +8,12 @@
         <h3>Welcome To Naga Online Tailoring Services</h3>
         <div class="mdl-layout-spacer"></div>
         <div>
-        <button id="logout" class="mdl-button mdl-js-button mdl-js-ripple-effect">
-           <i class="material-icons">power_settings_new</i>
-           Logout
-        </button>
+        <router-link v-bind:to="'/nots/'" exact>
+          <button id="logout" class="mdl-button mdl-js-button mdl-js-ripple-effect">
+             <i class="material-icons">power_settings_new</i>
+             Logout
+          </button>
+        </router-link>
         </div>
       </div>
     </header>
