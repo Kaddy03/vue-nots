@@ -9,7 +9,7 @@
           <span class="mdl-layout-title"><h3>Sign Up as a Tailor</h3></span>
           <div class="mdl-layout-spacer"></div>
           <router-link v-bind:to="'/nots'">
-          <button class="mdl-button mdl-js-button mdl-js-ripple-effect">
+          <button id="backLogin" class="mdl-button mdl-js-button mdl-js-ripple-effect">
 	           <i class="material-icons">keyboard_backspace</i>
 		         Back to Login Page
 	        </button>
@@ -48,9 +48,8 @@
               <label class="mdl-textfield__label" for="tDesc">Services and MTO Offers</label>
           </div>
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-              <textarea class="mdl-textfield__input" type="text" rows= "3" id="tWork" v-model="tailor.tWorking">
-              </textarea>
-              <label class="mdl-textfield__label" for="tWork">Working Hours</label>
+              <input class="mdl-textfield__input" type="text" id="tWork" v-model="tailor.twork">
+              <label class="mdl-textfield__label" for="tWork">Store Hours</label>
           </div>
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
     			    <input class="mdl-textfield__input" type="text" id="contact" pattern="[+0-9]{11,13}$" v-model="tailor.tContact">
@@ -79,6 +78,9 @@
     		  </div>
         </div>
       </div>
+      <div class="mdl-grid">
+        <h2 id="loading" v-if="signingUp">Signing Up... Please Wait...</h2>
+      </div>
       <!-- SIGN UP CONTROLS -->
       <div class="mdl-grid">
         <div class="mdl-cell mdl-cell--9-col">
@@ -95,9 +97,6 @@
             <i class="material-icons">done_all</i> Sign Up
           </button>
         </div>
-      </div>
-      <div class="mdl-grid">
-        <h2 id="loading" v-if="signingUp">Signing Up... Please Wait...</h2>
       </div>
       </form>
     </div>
@@ -253,7 +252,7 @@ export default {
   background-color: #E0E0E0;
 }
 .mdl-layout__header{
-  background-color: #3f51b5;
+  background-color: #21C0C0;
 }
 .hint{
   font-size: 8pt;
@@ -261,6 +260,9 @@ export default {
 }
 .mdl-js-progress{
   width: 100%;
+}
+#backLogin{
+  color: white;
 }
 #tailorInfo, #acctInfo{
   padding: 20px;

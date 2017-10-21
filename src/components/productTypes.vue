@@ -130,11 +130,7 @@
                     </label>
                     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="waistUpper">
                       <input type="checkbox" id="waistUpper" class="mdl-checkbox__input" v-model="pType.waist_upper">
-                      <span class="mdl-checkbox__label">Waist (Upper)</span>
-                    </label>
-                    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="hipsUpper">
-                      <input type="checkbox" id="hipsUpper" class="mdl-checkbox__input" v-model="pType.hips_upper">
-                      <span class="mdl-checkbox__label">Hips (Upper)</span>
+                      <span class="mdl-checkbox__label">Waist (upper)</span>
                     </label>
                   </div>
                   <!-- LOWER -->
@@ -142,11 +138,11 @@
                     <p>FOR LOWER GARMENTS</p>
                     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="waistLower">
                       <input type="checkbox" id="waistLower" class="mdl-checkbox__input" v-model="pType.waist_lower">
-                      <span class="mdl-checkbox__label">Waist (Lower)</span>
+                      <span class="mdl-checkbox__label">Waist (lower)</span>
                     </label>
                     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="hipsLower">
                       <input type="checkbox" id="hipsLower" class="mdl-checkbox__input" v-model="pType.hips_lower">
-                      <span class="mdl-checkbox__label">Hips (Lower)</span>
+                      <span class="mdl-checkbox__label">Hips</span>
                     </label>
                     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="crotch">
                       <input type="checkbox" id="crotch" class="mdl-checkbox__input" v-model="pType.crotch">
@@ -225,11 +221,10 @@
                           <tr v-if="type.breast_point"><td>Breast Point</td></tr>
                           <tr v-if="type.waist_point"><td>Waist Point</td></tr>
                           <tr v-if="type.stomach"><td>Stomach</td></tr>
+                          <tr v-if="type.waist_upper"><td>Waist (upper)</td></tr>
                           <tr v-if="type.wrist"><td>Wrist</td></tr>
-                          <tr v-if="type.waist_upper"><td>Waist (Upper)</td></tr>
-                          <tr v-if="type.hips_upper"><td>Hips (Upper)</td></tr>
-                          <tr v-if="type.waist_lower"><td>Waist (Lower)</td></tr>
-                          <tr v-if="type.hips_lower"><td>Hips Lower</td></tr>
+                          <tr v-if="type.waist_lower"><td>Waist (lower)</td></tr>
+                          <tr v-if="type.hips_lower"><td>Hips</td></tr>
                           <tr v-if="type.crotch"><td>Crotch</td></tr>
                           <tr v-if="type.thigh_width"><td>Thigh Width</td></tr>
                           <tr v-if="type.pants_length"><td>Pants Length</td></tr>
@@ -278,14 +273,13 @@
                           <input type="checkbox" v-model="type.breast_point"> Breast Point<br>
                           <input type="checkbox" v-model="type.waist_point"> Waist Point<br>
                           <input type="checkbox" v-model="type.stomach"> Stomach<br>
-                          <input type="checkbox" v-model="type.waist_upper"> Waist (Upper)<br>
-                          <input type="checkbox" v-model="type.hips_upper"> Hips (Upper)<br>
+                          <input type="checkbox" v-model="type.waist_uppert"> Waist (upper))<br>
                         </div>
                         <!-- LOWER -->
                         <div class="mdl-cell mdl-cell--6-col">
                           <p>FOR LOWER GARMENTS</p>
-                          <input type="checkbox" v-model="type.waist_lower"> Waist (Lower)<br>
-                          <input type="checkbox" v-model="type.hips_lower"> Hips (Lower)<br>
+                          <input type="checkbox" v-model="type.waist_lower"> Waist (lower) <br>
+                          <input type="checkbox" v-model="type.hips_lower"> Hips <br>
                           <input type="checkbox" v-model="type.crotch"> Crotch<br>
                           <input type="checkbox" v-model="type.thigh_width"> Thigh Width<br>
                           <input type="checkbox" v-model="type.pants_length"> Pants Length<br>
@@ -365,7 +359,6 @@ export default {
         stomach: false,
         wrist: false,
         waist_upper: false,
-        hips_upper: false,
         waist_lower: false,
         hips_lower: false,
         crotch: false,
