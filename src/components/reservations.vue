@@ -1,6 +1,7 @@
 <template>
   <div>
     <!-- BEGIN TEMPLATE -->
+  <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
   <!-- SIDE DRAWER -->
   <div class="mdl-layout__drawer">
@@ -15,16 +16,16 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <span class="mdl-navigation__link" href="">All Orders</span>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span class="mdl-navigation__link" href="">Ready-to-Wear's</span>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
-        <span class="mdl-navigation__link">My Product Types</span>
+        <span class="mdl-navigation__link"><i class="material-icons">style</i> My Product Types</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
-        <span id="currentNav" class="mdl-navigation__link">RTW reservations</span>
+        <span id="currentNav" class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
       </router-link>
     </nav>
   </div>
@@ -122,6 +123,7 @@
 export default {
   data () {
     return {
+      isLoading: true,
       tailorId: this.$route.params.id,
       tailorData: {},
       reservations: [],
@@ -143,8 +145,6 @@ export default {
         dateValid: this.dateValid,
         Remarks: this.remarks
       });
-      this.dateValid = "";
-      this.remarks = "";
       this.$refs.acceptDialog[diabox].close();
     },
     reject: function(diabox, index, id){
@@ -163,6 +163,12 @@ export default {
     closeReject: function(diabox){
       this.$refs.rejectDialog[diabox].close();
     }
+  },
+  beforeCreate() {
+    this.$nextTick(() => {
+      componentHandler.upgradeDom();
+      componentHandler.upgradeAllRegistered();
+    });
   },
   created() {
     //RETRIEVE RESERVATIONS
@@ -189,19 +195,20 @@ export default {
         }
       }
       this.reservations = rtwArray;
-      console.log(this.reservations);
-    });
-    //RETRIEVE TAILOR DATA
-    this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json').then(function(data){
-        return data.json();
+    }).then(function(){//RETRIEVE TAILOR DATA
+      return this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json');
+    }).then(function(data){
+      return data.json();
     }).then(function(data){
       this.tailorData = data;
+    }).then(function(data){
+      this.isLoading = false;
     });
     //COMPONENT UPGRADE
-    this.$nextTick(() => {
-      componentHandler.upgradeDom();
-      componentHandler.upgradeAllRegistered();
-    });
+  //  this.$nextTick(() => {
+    //  componentHandler.upgradeDom();
+    //  componentHandler.upgradeAllRegistered();
+  //  });
   },
   mounted() {
     var dialog = document.querySelectorAll('dialog');
@@ -241,6 +248,12 @@ dialog{
 .mdl-data-table{
   table-layout: fixed;
   width: 100%;
+}
+.mdl-js-progress{
+  width: 100%;
+}
+.mdl-dialog__content{
+  font-size: 14pt;
 }
 #currentNav{
   background-color: #21C0C0;

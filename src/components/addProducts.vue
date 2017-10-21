@@ -14,16 +14,16 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <span class="mdl-navigation__link" href="">All Orders</span>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span id="currentNav" class="mdl-navigation__link" href="">Ready-to-Wears</span>
+        <span id="currentNav" class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
-        <span class="mdl-navigation__link">My Product Types</span>
+        <span class="mdl-navigation__link"><i class="material-icons">style</i> My Product Types</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
-        <span class="mdl-navigation__link">RTW reservations</span>
+        <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
       </router-link>
     </nav>
   </div>
@@ -36,7 +36,7 @@
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
         <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored">
            <i class="material-icons">keyboard_backspace</i>
-           Back to Login Page
+           Back to Ready-to-Wears
         </button>
       </router-link>
       <!-- SELECT BOXES -->
@@ -53,33 +53,33 @@
               <option v-for="size in sizes">{{ size.sizeLetter }}</option>
             </select>
             </p>
-            <p>
-            Select a Fabric
-            <select v-model="ready_to_wear.fabric">
-              <option v-for="fabric in fabrics">{{ fabric.fabricName }}</option>
-            </select>
-            </p>
       </div>
       <!-- FORMS -->
       <div class="mdl-grid">
-        <div class="mdl-cell mdl-cell--4-col">
+        <div class="mdl-cell mdl-cell--3-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
     			     <input class="mdl-textfield__input" type="text" id="rtwColor" v-model="ready_to_wear.rtwColor">
     			     <label class="mdl-textfield__label" for="rtwColor">Color</label>
     		  </div>
         </div>
-        <div class="mdl-cell mdl-cell--4-col">
+        <div class="mdl-cell mdl-cell--3-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
             <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="rtwPrice" v-model="ready_to_wear.rtwPrice">
             <label class="mdl-textfield__label" for="rtwPrice">Price</label>
             <span class="mdl-textfield__error">Input is not a number!</span>
           </div>
         </div>
-        <div class="mdl-cell mdl-cell--4-col">
+        <div class="mdl-cell mdl-cell--3-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
             <input class="mdl-textfield__input" type="text" pattern="-?[0-9]*(\.[0-9]+)?" id="rtwStock" v-model="ready_to_wear.rtwStock">
             <label class="mdl-textfield__label" for="rtwStock">Number of Stock</label>
             <span class="mdl-textfield__error">Input is not a number!</span>
+          </div>
+        </div>
+        <div class="mdl-cell mdl-cell--3-col">
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="text" id="rtwStock" v-model="ready_to_wear.fabric">
+            <label class="mdl-textfield__label" for="rtwStock">Type of fabric</label>
           </div>
         </div>
       </div>
@@ -97,7 +97,7 @@
       <div class="mdl-grid">
         <div id="txtfield" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
           <textarea class="mdl-textfield__input" type="text" rows= "10" id="rtwDescription" v-model="ready_to_wear.rtwDescription"></textarea>
-          <label class="mdl-textfield__label" for="rtwDescription">Description/Additional Details</label>
+          <label class="mdl-textfield__label" for="rtwDescription">Description/Additional Details/Exact Measurements</label>
         </div>
       </div>
       <!-- SUBMIT BUTTON -->
@@ -112,11 +112,9 @@
               *The information you entered can't be edited later, after you posted
             </div>
             <div class="mdl-dialog__actions">
-              <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
                 <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="post">
                   YES
                 </button>
-              </router-link>
               <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="closeDialog">
                 Back
               </button>
@@ -159,6 +157,7 @@ export default {
     post: function(){
       let imageUrl
       let key
+      let goTo = this.$router
       this.$firebase.database().ref('ready_to_wears').push(this.ready_to_wear)
         .then((data) => {
           key = data.key
@@ -172,8 +171,11 @@ export default {
         .then(fileData => {
           imageUrl = fileData.metadata.downloadURLs[0]
           return this.$firebase.database().ref('ready_to_wears').child(key).update({rtwImg: imageUrl, rwtId: key, tailorName: this.tailorData.tName})
+        }).then(function(){
+          alert("Product Added");
+        }).then(function(){
+          goTo.push({ name: 'rtws', params: { id: this.$route.params.id }});
         });
-      alert("Product Added");
     },
     prompt: function(){
       dialog.showModal();
@@ -248,9 +250,6 @@ export default {
   },
   mounted() {
     var dialog = document.querySelector('dialog');
-    if (!dialog.showModal) {
-      dialogPolyfill.registerDialog(dialog);
-    }
   }
 }
 

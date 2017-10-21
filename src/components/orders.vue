@@ -1,6 +1,7 @@
 <template>
   <div>
     <!-- BEGIN TEMPLATE -->
+  <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
   <!-- SIDE DRAWER -->
   <div class="mdl-layout__drawer">
@@ -15,16 +16,16 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <span id="currentNav" class="mdl-navigation__link" href="">All Orders</span>
+        <span id="currentNav" class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span class="mdl-navigation__link" href="">Ready-to-Wear's</span>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
-        <span class="mdl-navigation__link">My Product Types</span>
+        <span class="mdl-navigation__link"><i class="material-icons">style</i> My Product Types</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
-        <span class="mdl-navigation__link">RTW reservations</span>
+        <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
       </router-link>
     </nav>
   </div>
@@ -42,17 +43,17 @@
                 <th class="mdl-data-table__cell--non-numeric">Product Type</th>
                 <th>Measurements</th>
                 <th>Quantity</th>
-                <th>Preferred Tailor</th>
                 <th>Customer Info</th>
-                <th>Accepted?</th>
+                <th>Status</th>
+                <th>Tentative Date of Finish</th>
                 <th>Accept Order</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="order, ndx in orders">
-                <td class="mdl-data-table__cell--non-numeric">{{ order.productType }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{ order.Product_Type }}</td>
                 <td>
-                <button class="mdl-button mdl-js-button mdl-js-ripple-effect" v-on:click="showMeasurements(ndx)">
+                <button id="measurements" class="mdl-button mdl-js-button mdl-js-ripple-effect" v-on:click="showMeasurements(ndx)">
                   See Measurements
                 </button>
                 <!-- DIALOG FOR MEASUREMENTS -->
@@ -61,10 +62,29 @@
                   <div class="mdl-dialog__content">
                     <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
                       <tbody>
-                        <tr v-for="measurement in order.measurementsArray">
-                          <td>{{ measurement[0] }}</td>
-                          <td>{{ measurement[1] }}</td>
-                        </tr>
+                        <tr v-if="order.Arm_hole"><td>Arm Hole = {{ order.Arm_hole }}</td></tr>
+                        <tr v-if="order.Bicep"><td>Bicep = {{ order.Bicep }}</td></tr>
+                        <tr v-if="order.Chest"><td>Chest = {{ order.Chest }}</td></tr>
+                        <tr v-if="order.Neck"><td>Neck = {{ order.Neck }}</td></tr>
+                        <tr v-if="order.Shirt_Length"><td>Shirt Length = {{ order.Shirt_Lenght }}</td></tr>
+                        <tr v-if="order.Short_Sleeve"><td>Short Sleeve Length = {{ order.Short_Sleeve }}</td></tr>
+                        <tr v-if="order.Long_Sleeve"><td>Long Sleeve Length = {{ order.Long_Sleeve }}</td></tr>
+                        <tr v-if="order.Shoulder_Width"><td>Shoulder Width = {{ order.Shoulder_Width }}</td></tr>
+                        <tr v-if="order.Bust"><td>Bust = {{ order.Bust }}</td></tr>
+                        <tr v-if="order.Breast_Point"><td>Breast Point = {{ order.Breast_Point}}</td></tr>
+                        <tr v-if="order.Waist_Point"><td>Waist Point = {{ order.Waist_Point }}</td></tr>
+                        <tr v-if="order.Stomach"><td>Stomach = {{ order.Stomach }}</td></tr>
+                        <tr v-if="order.Wrist"><td>Wrist= {{ order.Wrist }}</td></tr>
+                        <tr v-if="order.Waist_Upper"><td>Waist (Upper) = {{ order.Waist_Upper }}</td></tr>
+                        <tr v-if="order.Hips_Upper"><td>Hips (Upper) = {{ order.Hips_Upper }}</td></tr>
+                        <tr v-if="order.Waist_Lower"><td>Waist (Lower) = {{ order.Waist_Lower }}</td></tr>
+                        <tr v-if="order.Hips_Lower"><td>Hips (Lower) = {{ order.Hips_Lower }}</td></tr>
+                        <tr v-if="order.Crotch"><td>Crotch = {{ order.Crotch }}</td></tr>
+                        <tr v-if="order.Thigh_Width"><td>Thigh Width = {{ order.Thigh_Width }}</td></tr>
+                        <tr v-if="order.Pants_Length"><td>Pants Length = {{ order.Pants_Length }}</td></tr>
+                        <tr v-if="order.Inseam"><td>Inseam = {{ order.Inseam }}</td></tr>
+                        <tr v-if="order.Knee"><td>Knee = {{ order.Knee }}</td></tr>
+                        <tr v-if="order.Half_Hem"><td>Half-hem = {{ order.Half_Hem }}</td></tr>
                       </tbody>
                     </table>
                   </div>
@@ -75,9 +95,7 @@
                   </div>
                 </dialog>
                 </td>
-                <td>{{ order.quantity }}</td>
-                <td>{{ order.tailorShops }}</td>
-                <td>{{ order.accepted }}</td>
+                <td>{{ order.Quantity }}</td>
                 <td>
                 <button class="mdl-button mdl-js-button mdl-js-ripple-effect" v-on:click="showUser(ndx)">
                   See customer info
@@ -86,7 +104,7 @@
                 <dialog class="mdl-dialog" ref="userDialog">
                   <h4 class="mdl-dialog__title">Customer's Information</h4>
                   <div class="mdl-dialog__content">
-                    {{ order.userData && order.userData.Address }}
+                    {{ order.userData && order.userData.Account_username }}
                   </div>
                   <div class="mdl-dialog__actions">
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeUser(ndx)">
@@ -95,6 +113,8 @@
                   </div>
                 </dialog>
                 </td>
+                <td>{{ order.Status }}</td>
+                <td>{{ order.dateFinish }}</td>
                 <td>
                   <button id="accept" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showAccept(ndx, order.id)">
                     <i class="material-icons">assignment_turned_in</i>
@@ -103,20 +123,15 @@
                   <dialog class="mdl-dialog" ref="acceptDialog">
                     <h4 class="mdl-dialog__title">Accept MTO request?</h4>
                     <div class="mdl-dialog__content">
-                      <div>
-                        Tentative date of finish:
-                        <input type="date">
-                      </div>
-                      <div>
-                        Type your Remarks below:
-                      </div>
-                      <div>
-                        <textarea rows="3">
+                      <p>Tentative date of finish:
+                      <input type="date" v-model="dateFinish"><p>
+                      <p>
+                        <textarea rows="3" cols="50" placeholder="Enter your remarks here..." v-model="remarks">
                         </textarea>
-                      </div>
+                      </p>
                     </div>
                     <div class="mdl-dialog__actions">
-                      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="closeAccept(ndx)">
+                      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click.prevent="accept(ndx, order.id)">
                         Accept
                       </button>
                       <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeAccept(ndx)">
@@ -142,13 +157,25 @@
 export default {
   data () {
     return {
+      isLoading: true,
       tailorId: this.$route.params.id,
       users: [],
       orders: [],
-      tailorData: {}
+      tailorData: {},
+      remarks: "",
+      dateFinish: ""
     }
   },
   methods: {
+    accept: function(diabox, id){
+      this.$firebase.database().ref('Orders').child(id).update({
+        Status: "Accepted",
+        dateFinish: this.dateFinish,
+        Tailor_Remarks: this.remarks
+      }).then(function(){
+        location.reload(true);
+      });
+    },
     showMeasurements: function(diabox){
       this.$refs.measurementDialog[diabox].showModal();
     },
@@ -157,18 +184,22 @@ export default {
     },
     showUser: function(diabox){
       this.$refs.userDialog[diabox].showModal();
-      console.log(this.orders);
     },
     closeUser: function(diabox){
       this.$refs.userDialog[diabox].close();
     },
     showAccept: function(diabox, id){
       this.$refs.acceptDialog[diabox].showModal();
-      console.log(id);
     },
     closeAccept: function(diabox){
       this.$refs.acceptDialog[diabox].close();
     }
+  },
+  beforeCreate() {
+    this.$nextTick(() => {
+      componentHandler.upgradeDom();
+      componentHandler.upgradeAllRegistered();
+    });
   },
   created() {
     //RETRIEVE ORDERS
@@ -177,28 +208,32 @@ export default {
     }).then(function(data){
         var ordersArray = [];
         for (let key in data){
-            data[key].id = key;
-            data[key].measurementsArray = Object.entries(data[key].measurements).sort();
-            this.$http.get('https://nots-76611.firebaseio.com/Users/' + data[key].userId + '.json').then(function(userdata){
-              return userdata.json();
-            }).then(function(userdata){
-              this.$set(data[key], 'userData', userdata);
+          if(this.$route.params.id == data[key].TailorId){
+            this.$http.get('https://nots-76611.firebaseio.com/Users/' + data[key].CustomerId + '.json').then(function(userData){
+              return userData.json();
+            }).then(function(userData){
+              this.$set(data[key], 'userData', userData);
+            }).then(function(){
+              data[key].id = key;
+              ordersArray.push(data[key]);
             });
-            ordersArray.push(data[key]);
+          }
         }
-        this.orders = ordersArray;
-    });
-    //RETRIEVE TAILOR DATA
-    this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json').then(function(data){
-        return data.json();
+        this.orders = ordersArray.reverse();
+    }).then(function(){ //RETRIEVE TAILOR'S DATA
+      return this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json');
+    }).then(function(data){
+      return data.json();
     }).then(function(data){
       this.tailorData = data;
+    }).then(function(){ //HIDE SPINNER
+      this.isLoading = false;
     });
     //COMPONENT UPGRADE
-    this.$nextTick(() => {
-      componentHandler.upgradeDom();
-      componentHandler.upgradeAllRegistered();
-    });
+    //this.$nextTick(() => {
+    //  componentHandler.upgradeDom();
+    //  componentHandler.upgradeAllRegistered();
+  //  });
   },
   mounted() {
     var dialog = document.querySelectorAll('dialog');
@@ -237,6 +272,12 @@ dialog{
 }
 .mdl-data-table{
   table-layout: fixed;
+  width: 100%;
+}
+.mdl-dialog__content{
+  font-size: 14pt;
+}
+.mdl-js-progress{
   width: 100%;
 }
 #currentNav{

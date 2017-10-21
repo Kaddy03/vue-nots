@@ -1,6 +1,7 @@
 <template>
   <div class="signUp">
     <!-- BEGIN TEMPLATE -->
+    <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
       <!-- HEADER -->
       <header class="mdl-layout__header">
@@ -47,6 +48,11 @@
               <label class="mdl-textfield__label" for="tDesc">Services and MTO Offers</label>
           </div>
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+              <textarea class="mdl-textfield__input" type="text" rows= "3" id="tWork" v-model="tailor.tWorking">
+              </textarea>
+              <label class="mdl-textfield__label" for="tWork">Working Hours</label>
+          </div>
+          <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
     			    <input class="mdl-textfield__input" type="text" id="contact" pattern="[+0-9]{11,13}$" v-model="tailor.tContact">
     			    <label class="mdl-textfield__label" for="contact">Contact Number</label>
               <span class="mdl-textfield__error">Invalid number!</span>
@@ -90,8 +96,12 @@
           </button>
         </div>
       </div>
+      <div class="mdl-grid">
+        <h2 id="loading" v-if="signingUp">Signing Up... Please Wait...</h2>
+      </div>
       </form>
     </div>
+
     <!-- END TEMPLATE -->
   </div>
 </template>
@@ -102,6 +112,8 @@
 export default {
   data () {
     return {
+      signingUp: false,
+      isLoading: true,
       regTailors: [],
       image: null,
       tailor: {
@@ -112,7 +124,8 @@ export default {
         tUsername: "",
         tPassword: "",
         tEmailAdd: "",
-        tImage: ""
+        tImage: "",
+        tWorking: ""
       },
       password2: "",
       accepted: false
@@ -120,8 +133,10 @@ export default {
   },
   methods: {
     post: function(){
+      let load = this.signingUp;
       let imageUrl
       let key
+      let goTo = this.$router;
       if (!this.entryComplete){
         alert("PLEASE FILL ALL THE ASKED INPUT!");
       }
@@ -132,6 +147,7 @@ export default {
         alert("YOUR USERNAME OR PASSWORD IS ALREADY TAKEN!");
       }
       else{
+        this.signingUp = true;
         this.$firebase.database().ref('tailors').push(this.tailor)
           .then((data) => {
             key = data.key
@@ -145,9 +161,13 @@ export default {
           .then(fileData => {
             imageUrl = fileData.metadata.downloadURLs[0]
             return this.$firebase.database().ref('tailors').child(key).update({tImage: imageUrl, tId: key})
+          }).then(function(){
+            load = false
+          }).then(function(){
+            alert("Sign Up Succesful!");
+          }).then(function(){
+            goTo.push({ path: '/nots' });
           });
-        alert("Sign Up Succesful!");
-        this.$router.push({ path: '/nots' });
       }
     },
     onPickfile: function(){
@@ -196,12 +216,13 @@ export default {
       return result;
     }
   },
-  created() {
-    //COMPONENT UPGRADE
+  beforeCreate() {
     this.$nextTick(() => {
       componentHandler.upgradeDom();
       componentHandler.upgradeAllRegistered();
     });
+  },
+  created() {
     //RETRIEVE REGISTERED TAILORS
     this.$http.get('https://nots-76611.firebaseio.com/tailors.json').then(function(data){
       return data.json();
@@ -212,6 +233,8 @@ export default {
           usersArray.push(data[key]);
       }
       this.regTailors = usersArray;
+    }).then(function(){
+      this.isLoading = false;
     });
   }
 }
@@ -235,6 +258,9 @@ export default {
 .hint{
   font-size: 8pt;
   color: red;
+}
+.mdl-js-progress{
+  width: 100%;
 }
 #tailorInfo, #acctInfo{
   padding: 20px;

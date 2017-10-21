@@ -1,6 +1,7 @@
 <template>
   <div>
     <!-- BEGIN TEMPLATE -->
+  <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
   <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
   <!-- SIDE DRAWER -->
   <div class="mdl-layout__drawer">
@@ -15,16 +16,16 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <span class="mdl-navigation__link">All Orders</span>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span class="mdl-navigation__link">Ready-to-Wears</span>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
-        <span id="currentNav" class="mdl-navigation__link">My Product Types</span>
+        <span id="currentNav" class="mdl-navigation__link"><i class="material-icons">style</i> My Product Types</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
-        <span class="mdl-navigation__link">RTW reservations</span>
+        <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
       </router-link>
     </nav>
   </div>
@@ -54,7 +55,7 @@
                     <p>FOR UPPER GARMENTS</p>
                     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="armhole">
                       <input type="checkbox" id="armhole" class="mdl-checkbox__input" v-model="pType.arm_hole">
-                      <span class="mdl-checkbox__label">Arm Hole</span>
+                      <span class="mdl-checkbox__label">Arm Hole = {{ pType.arm_hole }}</span>
                     </label>
                     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="bicep">
                       <input type="checkbox" id="bicep" class="mdl-checkbox__input" v-model="pType.bicep">
@@ -313,6 +314,7 @@
 export default {
   data () {
     return {
+      isLoading: true,
       tailorId: this.$route.params.id,
       tailorData: {},
       pType: {
@@ -350,21 +352,28 @@ export default {
       this.$refs.addDialog.showModal();
     },
     post: function(){
-      this.$http.post('https://nots-76611.firebaseio.com/product_types.json', this.pType);
-      this.$refs.addDialog.close();
-      alert("Product Type Added");
-      location.reload();
+      this.$http.post('https://nots-76611.firebaseio.com/product_types.json', this.pType).then(function(){
+        this.$refs.addDialog.close();
+        alert("Product Type Added");
+      }).then(function(){
+        location.reload();
+      });
     },
     edit: function(diag, id, data){
-      this.$firebase.database().ref('product_types').child(id).update(data);
-      this.$refs.editDialog[diag].close();
-      alert("Product Type Edited");
+      let diaBox = this.$refs.editDialog[diag];
+      this.$firebase.database().ref('product_types').child(id).update(data).then(function(){
+        diaBox.close();
+        alert("Product Type Edited");
+      });
     },
     ptDelete: function(diag, id){
-      this.$http.delete('https://nots-76611.firebaseio.com/product_types/' + id + '.json');
-      this.$refs.deleteDialog[diag].close();
-      alert("Product Type Deleted");
-      location.reload();
+      let diaBox = this.$refs.deleteDialog[diag];
+      this.$firebase.database().ref('product_types').child(id).remove().then(function(){
+        diaBox.close();
+        alert("Product Type Deleted");
+      }).then(function(){
+        location.reload();
+      });
     },
     closeDialog: function(){
       this.$refs.addDialog.close();
@@ -400,13 +409,15 @@ export default {
           ptArray.push(data[key]);
         }
       }
-      this.types = ptArray;
-    });
-    //RETRIEVE TAILOR DATA
-    this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json').then(function(data){
-        return data.json();
+      this.types = ptArray.reverse();
+    }).then(function(){ //RETRIEVAL FOR TAILOR DATA
+      return this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json');
+    }).then(function(data){
+      return data.json();
     }).then(function(data){
       this.tailorData = data;
+    }).then(function(){
+      this.isLoading = false;
     });
     //COMPONENT UPGRADE
     this.$nextTick(() => {
@@ -464,6 +475,9 @@ dialof{
 }
 .mdl-dialog__content{
   font-size: 14pt;
+}
+.mdl-js-progress{
+  width: 100%;
 }
 #currentNav{
   background-color: #21C0C0;
