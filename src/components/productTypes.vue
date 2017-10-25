@@ -202,7 +202,7 @@
                     See Measurements
                   </button>
                   <!-- DIALOG FOR MEASUREMENTS -->
-                  <dialog class="mdl-dialog" ref="measureDialog">
+                  <dialog id="mDialog" class="mdl-dialog" ref="measureDialog">
                     <div class="mdl-dialog__content">
                       <table class="mdl-data-table mdl-js-data-table">
                         <thead>
@@ -475,10 +475,6 @@ ul li{
 td button{
   text-transform: none;
 }
-dialof{
-  height: auto;
-  width: auto;
-}
 .drawerHeader{
   background-color: #3f51b5;
   color: white;
@@ -537,6 +533,10 @@ dialof{
 }
 #ptNameInput{
   width: 100%;
+}
+#mDialog{
+  width: 15%;
+  height: auto;
 }
 
 

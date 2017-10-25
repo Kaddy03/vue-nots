@@ -52,118 +52,208 @@
   <main class="mdl-layout__content">
     <div class="page-content">
       <div class="mdl-grid">
-        <h5>All Orders</h5>
+        <h5>MTO Orders</h5>
       </div>
       <div class="mdl-grid">
-          <!-- PRODUCT LIST -->
-          <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
-            <thead>
-              <tr>
-                <th class="mdl-data-table__cell--non-numeric">Product Type</th>
-                <th>Measurements</th>
-                <th>Quantity</th>
-                <th>Customer Info</th>
-                <th>Status</th>
-                <th>Tentative Date of Finish</th>
-                <th>Accept Order</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="order, ndx in orders">
-                <td class="mdl-data-table__cell--non-numeric">{{ order.Product_Type }}</td>
-                <td>
-                <button id="measurements" class="mdl-button mdl-js-button mdl-js-ripple-effect" v-on:click="showMeasurements(ndx)">
+        Search by Customer:
+        <input type="text" v-model="search">
+      </div>
+      <div class="mdl-grid">
+        <table class="mdl-data-table mdl-js-data-table">
+          <thead>
+            <th>Reference</th>
+            <th>Product type</th>
+            <th>Measurements</th>
+            <th>Customer</th>
+            <th>Quantity</th>
+            <th>Finish Date</th>
+            <th>
+              Status:
+              <select v-model="statSearch">
+                <option>All</option>
+                <option>Pending</option>
+                <option>Rejected</option>
+                <option>Accepted</option>
+                <option>Completed</option>
+              </select>
+            </th>
+            <th>Accept/Reject</th>
+          </thead>
+          <tbody>
+            <tr v-for="order, ndx in filteredOrders">
+              <td><img :src="order.Image" width="100" v-on:click="zoomImage(ndx)"></td>
+              <!-- DIALOG FOR IMAGE ZOOM -->
+              <dialog id="imageBox" class="mdl-dialog" ref="imageDialog">
+                <div class="mdl-dialog__content">
+                  <img :src="order.Image" height="300">
+                </div>
+                <div class="mdl-dialog__actions">
+                  <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeImage(ndx)">
+                    Ok
+                  </button>
+                </div>
+              </dialog>
+              <td>{{ order.Product_Type }}</td>
+              <td>
+                <button id="measure" class="mdl-button mdl-js-button mdl-js-ripple-effect" v-on:click="showMeasurements(ndx)">
                   See Measurements
                 </button>
                 <!-- DIALOG FOR MEASUREMENTS -->
-                <dialog class="mdl-dialog" ref="measurementDialog">
-                  <h4 class="mdl-dialog__title">Customer's measurements</h4>
+                <dialog id="mDialog" class="mdl-dialog" ref="measurementDialog">
                   <div class="mdl-dialog__content">
-                    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp">
+                    <table class="mdl-data-table mdl-js-data-table">
+                      <thead>
+                        <th>Measurements</th>
+                      </thead>
                       <tbody>
-                        <tr v-if="order.Arm_hole"><td>Arm Hole = {{ order.Arm_hole }}</td></tr>
-                        <tr v-if="order.Bicep"><td>Bicep = {{ order.Bicep }}</td></tr>
-                        <tr v-if="order.Chest"><td>Chest = {{ order.Chest }}</td></tr>
-                        <tr v-if="order.Neck"><td>Neck = {{ order.Neck }}</td></tr>
-                        <tr v-if="order.Shirt_Length"><td>Shirt Length = {{ order.Shirt_Lenght }}</td></tr>
-                        <tr v-if="order.Short_Sleeve"><td>Short Sleeve Length = {{ order.Short_Sleeve }}</td></tr>
-                        <tr v-if="order.Long_Sleeve"><td>Long Sleeve Length = {{ order.Long_Sleeve }}</td></tr>
-                        <tr v-if="order.Shoulder_Width"><td>Shoulder Width = {{ order.Shoulder_Width }}</td></tr>
-                        <tr v-if="order.Bust"><td>Bust = {{ order.Bust }}</td></tr>
-                        <tr v-if="order.Breast_Point"><td>Breast Point = {{ order.Breast_Point}}</td></tr>
-                        <tr v-if="order.Waist_Point"><td>Waist Point = {{ order.Waist_Point }}</td></tr>
-                        <tr v-if="order.Stomach"><td>Stomach = {{ order.Stomach }}</td></tr>
-                        <tr v-if="order.Wrist"><td>Wrist= {{ order.Wrist }}</td></tr>
-                        <tr v-if="order.Waist_Upper"><td>Waist (Upper) = {{ order.Waist_Upper }}</td></tr>
-                        <tr v-if="order.Hips_Upper"><td>Hips (Upper) = {{ order.Hips_Upper }}</td></tr>
-                        <tr v-if="order.Waist_Lower"><td>Waist (Lower) = {{ order.Waist_Lower }}</td></tr>
-                        <tr v-if="order.Hips_Lower"><td>Hips (Lower) = {{ order.Hips_Lower }}</td></tr>
-                        <tr v-if="order.Crotch"><td>Crotch = {{ order.Crotch }}</td></tr>
-                        <tr v-if="order.Thigh_Width"><td>Thigh Width = {{ order.Thigh_Width }}</td></tr>
-                        <tr v-if="order.Pants_Length"><td>Pants Length = {{ order.Pants_Length }}</td></tr>
-                        <tr v-if="order.Inseam"><td>Inseam = {{ order.Inseam }}</td></tr>
-                        <tr v-if="order.Knee"><td>Knee = {{ order.Knee }}</td></tr>
-                        <tr v-if="order.Half_Hem"><td>Half-hem = {{ order.Half_Hem }}</td></tr>
+                        <tr v-if="order.Arm_Hole"><td>Arm Hole = {{order.Arm_Hole }} in</td></tr>
+                        <tr v-if="order.Bicep"><td>Bicep = {{ order.Bicep }} in</td></tr>
+                        <tr v-if="order.Chest"><td>Chest = {{ order.Chest }} in</td></tr>
+                        <tr v-if="order.Neck"><td>Neck = {{ order.Neck }} in</td></tr>
+                        <tr v-if="order.Shirt_Length"><td>Shirt Length = {{ order.Shirt_Length }} in</td></tr>
+                        <tr v-if="order.Short_Sleeve"><td>Short Sleeve Length = {{ order.Short_Sleeve }} in</td></tr>
+                        <tr v-if="order.Long_Sleeve"><td>Long Sleeve Length = {{ order.Long_Sleeve}} in</td></tr>
+                        <tr v-if="order.Shoulder_Width"><td>Shoulder Width = {{ order.Shoulder_Width }} in</td></tr>
+                        <tr v-if="order.Bust"><td>Bust = {{ order.Bus }} in</td></tr>
+                        <tr v-if="order.Breast_Point"><td>Breast Point = {{ order.Breast_Point }} in</td></tr>
+                        <tr v-if="order.Waist_Point"><td>Waist Point = {{ order.Waist_Point }} in</td></tr>
+                        <tr v-if="order.Stomach"><td>Stomach = {{ order.Stomach }} in</td></tr>
+                        <tr v-if="order.Waist_Upper"><td>Waist (upper) = {{ order.Waist_Upper }} in</td></tr>
+                        <tr v-if="order.Wrist"><td>Wrist = {{ order.Wrist }} in</td></tr>
+                        <tr v-if="order.Waist_Lower"><td>Waist (lower) = {{ order.Waist_Lower }} in</td></tr>
+                        <tr v-if="order.Hips_Lower"><td>Hips = {{ order.Hips_Lower }} in</td></tr>
+                        <tr v-if="order.Crotch"><td>Crotch = {{ order.Crotch }} in</td></tr>
+                        <tr v-if="order.Thigh_Width"><td>Thigh Width = {{ order.Thigh_Width }} in</td></tr>
+                        <tr v-if="order.Pants_Length"><td>Pants Length = {{ order.Pants_Length }} in</td></tr>
+                        <tr v-if="order.Inseam"><td>Inseam = {{ order.Inseam }} in</td></tr>
+                        <tr v-if="order.Knee"><td>Knee = {{ order.Knee }} in</td></tr>
+                        <tr v-if="order.Half_hem"><td>Half-hem = {{ order.Half_hem }} in</td></tr>
                       </tbody>
                     </table>
                   </div>
                   <div class="mdl-dialog__actions">
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeMeasurements(ndx)">
-                      OK
+                      Back
                     </button>
                   </div>
                 </dialog>
-                </td>
-                <td>{{ order.Quantity }}</td>
-                <td>
-                <button class="mdl-button mdl-js-button mdl-js-ripple-effect" v-on:click="showUser(ndx)">
-                  See customer info
+              </td>
+              <td>
+                {{ order.userData.Account_username }}
+                <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showUser(ndx)">
+                  <i class="material-icons">info_outline</i>
                 </button>
-                <!-- DIALOG FOR USER-->
-                <dialog class="mdl-dialog" ref="userDialog">
-                  <h4 class="mdl-dialog__title">Customer's Information</h4>
+                <!-- DIALOG FOR CUSTOMER INFO -->
+                <dialog id="infoBox" class="mdl-dialog" ref="userDialog">
+                  <p class="mdl-dialog__title">Customer Information</p>
                   <div class="mdl-dialog__content">
-                    {{ order.userData && order.userData.Account_username }}
+                    <div>
+                      <img :src="order.userData.Image" height="150">
+                    </div>
+                    <div>
+                      <p>Name: {{ order.userData.Account_username }}</p>
+                      <p>Contact Number: {{ order.userData.Phone_number }}</p>
+                      <p>Address: {{ order.userData.Address }}</p>
+                      <hr>
+                      <p>
+                      REMARKS:<br>
+                      {{ order.my_remarks }}
+                      </p>
+                    </div>
                   </div>
                   <div class="mdl-dialog__actions">
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeUser(ndx)">
-                      OK
+                      Ok
                     </button>
                   </div>
                 </dialog>
-                </td>
-                <td>{{ order.Status }}</td>
-                <td>{{ order.dateFinish }}</td>
-                <td>
-                  <button id="accept" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showAccept(ndx, order.id)">
-                    <i class="material-icons">assignment_turned_in</i>
+              </td>
+              <td>{{ order.MTO_quantity }}</td>
+              <td>{{ compDate(order.dateFinish) }}</td>
+              <td>{{ order.Status }}</td>
+              <td>
+                <button v-if="order.Status=='Pending'" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showAccept(ndx)">
+                  <i class="material-icons">done</i>
+                </button>
+                <!-- DIALOG FOR ACCEPT -->
+                <dialog id="accept" class="mdl-dialog" ref="acceptDialog">
+                  <p class="mdl-dialog__title">Accept this Order?</p>
+                  <div class="mdl-dialog__content">
+                    <p>Tentative Date of Finish:
+                    <input type="date" v-model="dateFinish"><p>
+                    <p>
+                      <textarea rows="3" cols="50" placeholder="Enter your remarks here..." v-model="remarks">
+                      </textarea>
+                    </p>
+                  </div>
+                  <!-- ACCEPT ACTIONS -->
+                  <div v-if="isAccepting" class="mdl-dialog__actions">
+                    <div class="loader">Accepting... Please Wait...</div>
+                  </div>
+                  <div v-else class="mdl-dialog__actions">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="accept(order.id)">
+                      Accept
+                    </button>
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeAccept(ndx)">
+                      Cancel
+                    </button>
+                  </div>
+                </dialog>
+                <button v-if="order.Status=='Pending'" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showReject(ndx)">
+                  <i class="material-icons">block</i>
+                </button>
+                <!-- DIALOG FOR REJECT -->
+                <dialog id="reject" class="mdl-dialog" ref="rejectDialog">
+                  <p class="mdl-dialog__title">Reject this Order?</p>
+                  <div class="mdl-dialog__content">
+                    <p>
+                      <textarea rows="3" cols="50" placeholder="Enter your remarks here..." v-model="remarks">
+                      </textarea>
+                    </p>
+                  </div>
+                  <!-- REJECT ACTIONS -->
+                  <div v-if="isRejecting" class="mdl-dialog__actions">
+                    <div class="loader">Rejecting... Please Wait...</div>
+                  </div>
+                  <div v-else class="mdl-dialog__actions">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="reject(order.id)">
+                      Reject
+                    </button>
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeReject(ndx)">
+                      Cancel
+                    </button>
+                  </div>
+                </dialog>
+                <div v-if="order.Status=='Accepted'">
+                  <button v-if="order.Status=='Accepted'" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showComplete(ndx)">
+                    <i class="material-icons">done_all</i>
                   </button>
-                  <!-- DIALOG FOR ACCEPT-->
-                  <dialog class="mdl-dialog" ref="acceptDialog">
-                    <h4 class="mdl-dialog__title">Accept MTO request?</h4>
-                    <div class="mdl-dialog__content">
-                      <p>Tentative date of finish:
-                      <input type="date" v-model="dateFinish"><p>
-                      <p>
-                        <textarea rows="3" cols="50" placeholder="Enter your remarks here..." v-model="remarks">
-                        </textarea>
-                      </p>
-                    </div>
-                    <div class="mdl-dialog__actions">
-                      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click.prevent="accept(ndx, order.id)">
-                        Accept
-                      </button>
-                      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeAccept(ndx)">
-                        Cancel
-                      </button>
-                    </div>
-                  </dialog>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  Complete
+                </div>
+                <!-- DIALOG FOR COMPLETE -->
+                <dialog id="complete" class="mdl-dialog" ref="completeDialog">
+                  <p class="mdl-dialog__title">Is this MTO complete?</p>
+                  <div class="mdl-dialog__content">
+                  </div>
+                  <!-- COMPLETE ACTIONS -->
+                  <div v-if="isCompleting" class="mdl-dialog__actions">
+                    <div class="loader">Completing... Please Wait...</div>
+                  </div>
+                  <div v-else class="mdl-dialog__actions">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="complete(order.id)">
+                      Yes
+                    </button>
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeComplete(ndx)">
+                      No
+                    </button>
+                  </div>
+                </dialog>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
+    </div>
   </main>
   </div>
     <!-- END TEMPLATE -->
@@ -176,6 +266,11 @@
 export default {
   data () {
     return {
+      statSearch: "Pending",
+      search: "",
+      isAccepting: false,
+      isRejecting: false,
+      isCompleting: false,
       isLoading: true,
       tailorId: this.$route.params.id,
       users: [],
@@ -186,32 +281,85 @@ export default {
     }
   },
   methods: {
-    accept: function(diabox, id){
+    compDate: function(date){
+      let newDate;
+      let status = this.$moment(date, "YYYY-MM-DD").fromNow();
+      if (status.lastIndexOf("ago") != -1)
+        newDate = "Expired";
+      else
+        newDate = date;
+      return newDate;
+    },
+    zoomImage: function(diabox){
+      this.$refs.imageDialog[diabox].showModal();
+    },
+    accept: function(id){
+      if((this.compDate(this.dateFinish) == "Expired") || (this.dateFinish == ""))
+        alert("PLEASE INPUT A VALID DATE!");
+      else{
+        this.isAccepting = true;
+        this.$firebase.database().ref('Orders').child(id).update({
+          Status: "Accepted",
+          dateFinish: this.dateFinish,
+          Tailor_Remarks: this.remarks
+        }).then(function(){
+          location.reload(true);
+        });
+      }
+    },
+    reject: function(id){
+      this.isRejecting = true;
       this.$firebase.database().ref('Orders').child(id).update({
-        Status: "Accepted",
-        dateFinish: this.dateFinish,
+        Status: "Rejected",
         Tailor_Remarks: this.remarks
       }).then(function(){
-        location.reload(true);
+        location.reload();
+      });
+    },
+    complete: function(id){
+      this.isCompleting = true;
+      this.$firebase.database().ref('Orders').child(id).update({
+        Status: "Completed",
+        dateFinish: ""
+      }).then(function(){
+        location.reload();
       });
     },
     showMeasurements: function(diabox){
       this.$refs.measurementDialog[diabox].showModal();
     },
-    closeMeasurements: function(diabox){
-      this.$refs.measurementDialog[diabox].close();
+    showAccept: function(diabox, id){
+      this.$refs.acceptDialog[diabox].showModal();
+    },
+    showReject: function(diabox){
+      this.$refs.rejectDialog[diabox].showModal();
+    },
+    showComplete: function(diabox){
+      this.$refs.completeDialog[diabox].showModal();
     },
     showUser: function(diabox){
       this.$refs.userDialog[diabox].showModal();
     },
+    closeMeasurements: function(diabox){
+      this.$refs.measurementDialog[diabox].close();
+    },
+    closeComplete: function(diabox){
+      this.$refs.completeDialog[diabox].close();
+    },
+    closeImage: function(diabox){
+      this.$refs.imageDialog[diabox].close();
+    },
     closeUser: function(diabox){
       this.$refs.userDialog[diabox].close();
     },
-    showAccept: function(diabox, id){
-      this.$refs.acceptDialog[diabox].showModal();
-    },
     closeAccept: function(diabox){
       this.$refs.acceptDialog[diabox].close();
+      this.remarks = "";
+      this.dateFinish = "";
+    },
+    closeReject: function(diabox){
+      this.$refs.rejectDialog[diabox].close();
+      this.remarks = "";
     }
   },
   beforeCreate() {
@@ -248,11 +396,21 @@ export default {
     }).then(function(){ //HIDE SPINNER
       this.isLoading = false;
     });
-    //COMPONENT UPGRADE
-    //this.$nextTick(() => {
-    //  componentHandler.upgradeDom();
-    //  componentHandler.upgradeAllRegistered();
-  //  });
+  },
+  computed: {
+    filteredOrders: function(){
+      let search2;
+      if(this.statSearch == "All")
+        search2 = "";
+      else
+        search2 = this.statSearch;
+      return this.orders.filter((order) =>{
+        return (
+          order.Status.includes(search2) &&
+          order.userData.Account_username.includes(this.search)
+        );
+      });
+    }
   },
   mounted() {
     var dialog = document.querySelectorAll('dialog');
@@ -277,9 +435,8 @@ li, a{
   text-decoration: none;
   color: white;
 }
-dialog{
-  height: auto;
-  width: 35%;
+td button{
+  text-transform: none;
 }
 .drawerHeader{
   background-color: #3f51b5;
@@ -303,6 +460,9 @@ dialog{
 .mdl-layout__header{
   background-color: #21C0C0;
 }
+.mdl-dialog__title{
+  white-space: pre-line;
+}
 #tailorAvatar {
   margin-top: 30px;
   width: 100px;
@@ -314,10 +474,28 @@ dialog{
 #logout {
   color: white;
 }
+#accept{
+  width: 30%;
+  height: auto;
+}
+#imageBox{
+  width: 40%;
+  height: auto;
+}
+#measurementDialog{
+  text-align: left;
+  width: 20%;
+  height: auto;
+}
 #currentNav{
   background-color: #21C0C0;
   color: white;
 }
-
+#infoBox{
+  text-align: left;
+}
+#measure{
+  font-size: 8pt;
+}
 
 </style>

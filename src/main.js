@@ -1,11 +1,13 @@
 import Vue from 'vue'
 import VueResource from 'vue-resource'
 import VueRouter from 'vue-router'
+import moment from 'moment'
 import * as firebase from 'firebase'
 import App from './App.vue'
 import Routes from './routes'
 
 Vue.use(VueResource);
+Vue.prototype.$moment = moment;
 Vue.use(VueRouter);
 Vue.prototype.$firebase = firebase;
 

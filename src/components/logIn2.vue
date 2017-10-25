@@ -22,6 +22,7 @@
 			                 <i class="material-icons">forward</i>Login
 		              </button>
 		          </form>
+		          <p>Don't have account yet? <router-link v-bind:to="'/nots/signup'" exact>Sign up now!</router-link></p>
 	        </div>
        </div>
      </div>
@@ -100,7 +101,6 @@ export default {
 
 .logIn{
   background-image: url("../assets/bespoke.jpg");
-  height: 637px;
 }
 .loginBox{
 	width: 50%;

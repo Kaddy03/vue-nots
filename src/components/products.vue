@@ -82,7 +82,7 @@
                   Size
                   <!-- SIZE FILTER -->
                   <select v-model="sizeSearch">
-                    <option></option>
+                    <option>All</option>
                     <option>XXXS</option>
                     <option>XXS</option>
                     <option>XS</option>
@@ -113,12 +113,12 @@
                     <p>{{ rtw.rtwDescription }}</p>
                   </div>
                   <div class="mdl-dialog__actions">
-                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect" v-on:click="closeInfo(ndx)">
+                    <button class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised mdl-js-ripple-effect" v-on:click="closeInfo(ndx)">
                       OK
                     </button>
                   </div>
                 </dialog>
-                <td class="mdl-data-table__cell--non-numeric">{{ rtw.type }}</td>
+                <td id="pType" class="mdl-data-table__cell--non-numeric">{{ rtw.type }}</td>
                 <td class="mdl-data-table__cell--non-numeric">{{ rtw.fabric }}</td>
                 <td class="mdl-data-table__cell--non-numeric">{{ rtw.size }}</td>
                 <td>{{ rtw.rtwPrice }}php</td>
@@ -191,7 +191,7 @@ export default {
       isDeleting: false,
       isLoading: true,
       search: '',
-      sizeSearch: "",
+      sizeSearch: "All",
       tailorId: this.$route.params.id,
       tailorData: {},
       fabrics: [],
@@ -237,10 +237,15 @@ export default {
   },
   computed: {
     filteredProds: function(){
+      let search2;
+      if(this.sizeSearch == "All")
+        search2 = "";
+      else
+        search2 = this.sizeSearch;
       return this.rtws.filter((rtw) =>{
         return (
           rtw.type.toLowerCase().includes(this.search.toLowerCase()) &&
-          rtw.size.includes(this.sizeSearch)
+          rtw.size.includes(search2)
         );
       });
     },
@@ -318,6 +323,10 @@ li, a{
 }
 .mdl-dialog__content{
   font-size: 14pt;
+  white-space: pre-line;
+}
+#pType{
+  white-space: pre-line;
 }
 #stockEdit{
   font-size: 12pt;
@@ -343,6 +352,10 @@ li, a{
 }
 #deleteRTW{
   width: 50%;
+  height: auto;
+}
+#RTWinfo{
+  width: 25%;
   height: auto;
 }
 
