@@ -37,14 +37,14 @@
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
         <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
       </router-link>
-      <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
+      <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
+        <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
         <span id="currentNav" class="mdl-navigation__link"><i class="material-icons">style</i> My Product Types</span>
       </router-link>
-      <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
-        <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
+      <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
       </router-link>
     </nav>
   </div>

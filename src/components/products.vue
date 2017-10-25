@@ -37,14 +37,14 @@
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
         <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
       </router-link>
-      <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-        <span id="currentNav" class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
+      <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
+        <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/productTypes'" exact>
         <span class="mdl-navigation__link"><i class="material-icons">style</i> My Product Types</span>
       </router-link>
-      <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
-        <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
+      <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
+        <span id="currentNav" class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
       </router-link>
     </nav>
   </div>
@@ -238,16 +238,18 @@ export default {
   computed: {
     filteredProds: function(){
       let search2;
+      let newArr;
       if(this.sizeSearch == "All")
         search2 = "";
       else
         search2 = this.sizeSearch;
-      return this.rtws.filter((rtw) =>{
+      newArr = this.rtws.filter((rtw) =>{
         return (
           rtw.type.toLowerCase().includes(this.search.toLowerCase()) &&
           rtw.size.includes(search2)
         );
       });
+      return newArr.reverse();
     },
   },
   beforeCreate() {
