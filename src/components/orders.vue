@@ -76,6 +76,7 @@
                 <option>Rejected</option>
                 <option>Accepted</option>
                 <option>Completed</option>
+                <option>Cancelled</option>
               </select>
             </th>
             <th>Accept/<br>Reject</th>
@@ -288,7 +289,7 @@
                 </div>
                 <!-- DIALOG FOR CANCEL -->
                 <dialog id="cancel" class="mdl-dialog" ref="cancelDialog">
-                  <p class="mdl-dialog__title">Cancel this MTO?</p>
+                  <h4 class="mdl-dialog__title">Cancel this MTO?</h4>
                   <div class="mdl-dialog__content">
                     <p>ORDER INFORMATION</p>
                     <p>
@@ -305,7 +306,7 @@
                     <div>Cancelling... Please Wait...</div>
                   </div>
                   <div v-else class="mdl-dialog__actions">
-                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="cancel(order.id)">
                       Yes
                     </button>
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeCancel(ndx)">
@@ -392,6 +393,15 @@ export default {
       this.isCompleting = true;
       this.$firebase.database().ref('Orders').child(id).update({
         Status: "Completed",
+        dateFinish: ""
+      }).then(function(){
+        location.reload();
+      });
+    },
+    cancel: function(id){
+      this.isCancelling = true;
+      this.$firebase.database().ref('Orders').child(id).update({
+        Status: "Cancelled",
         dateFinish: ""
       }).then(function(){
         location.reload();
@@ -570,6 +580,11 @@ td button{
 #complete{
   text-align: left;
   width: 30%;
+  height: auto;
+}
+#cancel{
+  text-align: left;
+  width: 25%;
   height: auto;
 }
 #imageBox{

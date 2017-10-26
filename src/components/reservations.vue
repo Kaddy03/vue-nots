@@ -74,9 +74,9 @@
                 <option>All</option>
                 <option>Pending</option>
                 <option>Reserved</option>
-                <option>Rejected</option>
-                <option>Cancelled</option>
+                <option>Rejected</option>                
                 <option>Completed</option>
+                <option>Cancelled</option>
               </select>
             </th>
             <th>Reserve/Reject</th>
