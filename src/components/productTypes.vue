@@ -35,7 +35,7 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Requests</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
         <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
@@ -241,7 +241,7 @@
                     </div>
                   </dialog>
                 </td>
-                <td class="mdl-data-table__cell--non-numeric">{{ type.ptPrice }}php</td>
+                <td class="mdl-data-table__cell--non-numeric"><span>&#8369;</span>{{ type.ptPrice }}</td>
                 <td>
                   <button id="edit" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showEdit(ndx)">
                     <i class="material-icons">mode_edit</i>

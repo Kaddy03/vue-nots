@@ -35,7 +35,7 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <span id="currentNav" class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
+        <span id="currentNav" class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Requests</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
         <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
@@ -45,14 +45,14 @@
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
         <span class="mdl-navigation__link" href=""><i class="material-icons">store_mall_directory</i> Ready-to-Wears</span>
-      </router-link>    
+      </router-link>
     </nav>
   </div>
   <!-- MAIN CONTENT -->
   <main class="mdl-layout__content">
     <div class="page-content">
       <div class="mdl-grid">
-        <h5>MTO Orders</h5>
+        <h5>MTO Requests</h5>
       </div>
       <div class="mdl-grid">
         Search by Customer:
@@ -248,7 +248,7 @@
                   </div>
                 </dialog>
                 <div v-if="order.Status=='Accepted'">
-                  <button v-if="order.Status=='Accepted'" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showComplete(ndx)">
+                  <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showComplete(ndx)">
                     <i class="material-icons">done_all</i>
                   </button>
                   Complete
@@ -266,7 +266,6 @@
                       Date Ordered: {{ order.Date_Ordered }}<br>
                       Quantity: {{ order.MTO_quantity }}<br>
                     </p>
-                    <hr>
                   </div>
                   <!-- COMPLETE ACTIONS -->
                   <div v-if="isCompleting" class="mdl-dialog__actions">
@@ -277,6 +276,39 @@
                       Yes
                     </button>
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeComplete(ndx)">
+                      No
+                    </button>
+                  </div>
+                </dialog>
+                <div v-if="order.Status=='Accepted'">
+                  <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showCancel(ndx)">
+                    <i class="material-icons">cancel</i>
+                  </button>
+                  Cancel
+                </div>
+                <!-- DIALOG FOR CANCEL -->
+                <dialog id="cancel" class="mdl-dialog" ref="cancelDialog">
+                  <p class="mdl-dialog__title">Cancel this MTO?</p>
+                  <div class="mdl-dialog__content">
+                    <p>ORDER INFORMATION</p>
+                    <p>
+                      Reference:<br>
+                      <img :src="order.Image" height="200"><br>
+                      Product Type: {{ order.Product_Type }}<br>
+                      Customer: {{ order.userData.Account_username }}<br>
+                      Date Ordered: {{ order.Date_Ordered }}<br>
+                      Quantity: {{ order.MTO_quantity }}<br>
+                    </p>
+                  </div>
+                  <!-- CANCEL ACTIONS -->
+                  <div v-if="isCancelling" class="mdl-dialog__actions">
+                    <div>Cancelling... Please Wait...</div>
+                  </div>
+                  <div v-else class="mdl-dialog__actions">
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect">
+                      Yes
+                    </button>
+                    <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeCancel(ndx)">
                       No
                     </button>
                   </div>
@@ -301,6 +333,7 @@ export default {
     return {
       statSearch: "Pending",
       search: "",
+      isCancelling: false,
       isAccepting: false,
       isRejecting: false,
       isCompleting: false,
@@ -321,7 +354,7 @@ export default {
         newDate = date + "\n(EXPIRED)";
       else
         newDate = date;
-      return newDate;
+      return newDate
     },
     zoomImage: function(diabox){
       this.$refs.imageDialog[diabox].showModal();
@@ -359,6 +392,7 @@ export default {
       this.isCompleting = true;
       this.$firebase.database().ref('Orders').child(id).update({
         Status: "Completed",
+        dateFinish: ""
       }).then(function(){
         location.reload();
       });
@@ -374,6 +408,9 @@ export default {
     },
     showComplete: function(diabox){
       this.$refs.completeDialog[diabox].showModal();
+    },
+    showCancel: function(diabox){
+      this.$refs.cancelDialog[diabox].showModal();
     },
     showUser: function(diabox){
       this.$refs.userDialog[diabox].showModal();
@@ -392,6 +429,9 @@ export default {
     },
     closeReject: function(diabox){
       this.$refs.rejectDialog[diabox].close();
+    },
+    closeCancel: function(diabox){
+      this.$refs.cancelDialog[diabox].close();
     },
     closeAccept: function(diabox){
       this.$refs.acceptDialog[diabox].close();
@@ -416,7 +456,7 @@ export default {
     }).then(function(data){
         var ordersArray = [];
         for (let key in data){
-          if(this.$route.params.id == data[key].TailorId){
+          if(this.$route.params.id == data[key].TailorId){ //RETRIEV USER'S DATA
             this.$http.get('https://nots-76611.firebaseio.com/Users/' + data[key].CustomerId + '.json').then(function(userData){
               return userData.json();
             }).then(function(userData){

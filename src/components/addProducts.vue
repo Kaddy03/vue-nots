@@ -36,7 +36,7 @@
     </div>
     <nav class="mdl-navigation">
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
-        <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Orders</span>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Requests</span>
       </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/reservations'" exact>
         <span class="mdl-navigation__link"><i class="material-icons">content_paste</i> RTW reservations</span>
