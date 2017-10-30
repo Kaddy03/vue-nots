@@ -23,7 +23,7 @@
       <div>
         <img id="tailorAvatar" :src="tailorData.tImage" height="100">
       </div>
-      <h3>{{ tailorData.tName }}</h3>
+      <h3 id="longLines">{{ tailorData.tName }}</h3>
       <p>
         My Profile
         <router-link v-bind:to="'/nots/' + tailorId + '/viewProfile'" exact>
@@ -55,8 +55,16 @@
         <h5>MTO Requests</h5>
       </div>
       <div class="mdl-grid">
-        Search by Customer:
-        <input type="text" v-model="search">
+        <div class="mdl-cell mdl-cell--3-col">
+          Search by Customer:
+          <input type="text" v-model="search">
+        </div>
+        <div class="mdl-cell mdl-cell--3-col">
+          Search by Product Type:
+          <input type="text" v-model="typeSearch">
+        </div>
+        <div class="mdl-cell mdl-cell--3-col"></div>
+        <div class="mdl-cell mdl-cell--3-col"></div>
       </div>
       <div class="mdl-grid">
         <table class="mdl-data-table mdl-js-data-table">
@@ -66,8 +74,8 @@
             <th>Measurements</th>
             <th>Customer</th>
             <th>Quantity</th>
-            <th>Date Submitted</th>
-            <th>Finish Date</th>
+            <th>Date Submitted<br>(YYYY-MM-DD)</th>
+            <th>Finish Date<br>(YYYY-MM-DD)</th>
             <th>
               Status:
               <select v-model="statSearch">
@@ -79,7 +87,7 @@
                 <option>Cancelled</option>
               </select>
             </th>
-            <th>Accept/<br>Reject</th>
+            <th></th>
           </thead>
           <tbody>
             <tr v-for="order, ndx in filteredOrders">
@@ -102,7 +110,7 @@
                 </button>
                 <!-- DIALOG FOR MEASUREMENTS -->
                 <dialog id="mDialog" class="mdl-dialog" ref="measurementDialog">
-                  <div class="mdl-dialog__content">
+                  <div v-if="hasMeasurements(order)" class="mdl-dialog__content">
                     <table class="mdl-data-table mdl-js-data-table">
                       <thead>
                         <th>Measurements</th>
@@ -133,6 +141,9 @@
                       </tbody>
                     </table>
                   </div>
+                  <div v-else id="longLines" class="mdl-dialog__content">
+                    This Product Type has no Measurements
+                  </div>
                   <div class="mdl-dialog__actions">
                     <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeMeasurements(ndx)">
                       Back
@@ -141,7 +152,7 @@
                 </dialog>
               </td>
               <td>
-                {{ order.userData.Account_username }}
+                {{ order.userData.Account_name }}
                 <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showUser(ndx)">
                   <i class="material-icons">info_outline</i>
                 </button>
@@ -153,9 +164,9 @@
                       <img :src="order.userData.Image" height="150">
                     </div>
                     <div>
-                      <p>Name: {{ order.userData.Account_username }}</p>
+                      <p>Name: {{ order.userData.Account_name }}</p>
                       <p>Contact Number: {{ order.userData.Phone_number }}</p>
-                      <p>Email Adsress: {{ order.userData.Email_address }}</p>
+                      <p>Email Adrress: {{ order.userData.Email_address }}</p>
                       <p>Address: {{ order.userData.Address }}</p>
                       <hr>
                       <p>
@@ -176,9 +187,12 @@
               <td id="fDate">{{ compDate(order.dateFinish) }}</td>
               <td>{{ order.Status }}</td>
               <td>
-                <button v-if="order.Status=='Pending'" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showAccept(ndx)">
-                  <i class="material-icons">done</i>
-                </button>
+                <div v-if="order.Status=='Pending'">
+                  <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showAccept(ndx)">
+                    <i class="material-icons">done</i>
+                  </button>
+                  Accept
+                </div>
                 <!-- DIALOG FOR ACCEPT -->
                 <dialog id="accept" class="mdl-dialog" ref="acceptDialog">
                   <p class="mdl-dialog__title">Accept this Order?</p>
@@ -188,12 +202,12 @@
                       Reference:<br>
                       <img :src="order.Image" height="200"><br>
                       Product Type: {{ order.Product_Type }}<br>
-                      Customer: {{ order.userData.Account_username }}<br>
+                      Customer: {{ order.userData.Account_name }}<br>
                       Date Ordered: {{ order.Date_Ordered }}<br>
                       Quantity: {{ order.MTO_quantity }}<br>
                     </p>
                     <hr>
-                    <p>Tentative Date of Finish:
+                    <p>Date of Finish:
                     <input type="date" v-model="dateFinish"><p>
                     <p>
                       <textarea rows="3" cols="50" placeholder="Enter your remarks here..." v-model="remarks">
@@ -213,9 +227,12 @@
                     </button>
                   </div>
                 </dialog>
-                <button v-if="order.Status=='Pending'" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showReject(ndx)">
-                  <i class="material-icons">block</i>
-                </button>
+                <div v-if="order.Status=='Pending'">
+                  <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showReject(ndx)">
+                    <i class="material-icons">block</i>
+                  </button>
+                  Reject
+                </div>
                 <!-- DIALOG FOR REJECT -->
                 <dialog id="reject" class="mdl-dialog" ref="rejectDialog">
                   <p class="mdl-dialog__title">Reject this Order?</p>
@@ -225,7 +242,7 @@
                       Reference:<br>
                       <img :src="order.Image" height="200"><br>
                       Product Type: {{ order.Product_Type }}<br>
-                      Customer: {{ order.userData.Account_username }}<br>
+                      Customer: {{ order.userData.Account_name }}<br>
                       Date Ordered: {{ order.Date_Ordered }}<br>
                       Quantity: {{ order.MTO_quantity }}<br>
                     </p>
@@ -296,7 +313,7 @@
                       Reference:<br>
                       <img :src="order.Image" height="200"><br>
                       Product Type: {{ order.Product_Type }}<br>
-                      Customer: {{ order.userData.Account_username }}<br>
+                      Customer: {{ order.userData.Account_name }}<br>
                       Date Ordered: {{ order.Date_Ordered }}<br>
                       Quantity: {{ order.MTO_quantity }}<br>
                     </p>
@@ -332,6 +349,7 @@
 export default {
   data () {
     return {
+      typeSearch: "",
       statSearch: "Pending",
       search: "",
       isCancelling: false,
@@ -357,12 +375,41 @@ export default {
         newDate = date;
       return newDate
     },
+    hasMeasurements(order){
+      if(
+        order.Bicep ||
+        order.Arm_Hole ||
+        order.Chest ||
+        order.Neck ||
+        order.Shirt_Length ||
+        order.Short_Sleeve ||
+        order.Long_Sleeve ||
+        order.Shoulder_Width ||
+        order.Bust ||
+        order.Breast_Point ||
+        order.Waist_Point ||
+        order.Stomach ||
+        order.Waist_Upper ||
+        order.Wrist ||
+        order.Waist_Lower ||
+        order.Hips_Lower ||
+        order.Crotch ||
+        order.Thigh_Width ||
+        order.Pants_Length ||
+        order.Inseam ||
+        order.Knee ||
+        order.Half_Hem
+      )
+        return true;
+      else
+        return false;
+    },
     zoomImage: function(diabox){
       this.$refs.imageDialog[diabox].showModal();
     },
     accept: function(id){
       let newDate = this.compDate(this.dateFinish);
-      if((newDate.lastIndexOf("EXPIRED") != -1) || (this.dateFinish == ""))
+      if((newDate.lastIndexOf("EXPIRED") != -1) || (this.dateFinish == "") || (this.dateFinish.length > 10))
         alert("PLEASE INPUT A VALID DATE!");
       else{
         this.isAccepting = true;
@@ -410,7 +457,7 @@ export default {
     showMeasurements: function(diabox){
       this.$refs.measurementDialog[diabox].showModal();
     },
-    showAccept: function(diabox, id){
+    showAccept: function(diabox){
       this.$refs.acceptDialog[diabox].showModal();
     },
     showReject: function(diabox){
@@ -499,7 +546,8 @@ export default {
       newArr = this.orders.filter((order) =>{
         return (
           order.Status.includes(search2) &&
-          order.userData.Account_username.toLowerCase().includes(this.search.toLowerCase())
+          order.userData.Account_name.toLowerCase().includes(this.search.toLowerCase()) &&
+          order.Product_Type.toLowerCase().includes(this.typeSearch.toLowerCase())
         );
       });
       return newArr.reverse();
@@ -609,7 +657,7 @@ td button{
 #pType{
   white-space: pre-line;
 }
-#fDate{
+#fDate, #longLines{
   white-space: pre-line;
 }
 

@@ -3,7 +3,7 @@
     <!-- BEGIN TEMPLATE -->
     <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
     <!-- BEGIN TEMPLATE -->
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
     <header class="mdl-layout__header">
       <div class="mdl-layout__header-row">
         <h3>Welcome To Naga Online Tailoring Services</h3>
@@ -56,12 +56,17 @@
           <h5>Ready-to-Wears | Add a RTW Product</h5>
       </div>
       <div class="mdl-grid">
-        <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
-          <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--raised mdl-button--colored">
-             <i class="material-icons">keyboard_backspace</i>
-             Back to Ready-to-Wears
-          </button>
-        </router-link>
+        <div class="mdl-cell mdl-cell--3-col"></div>
+        <div class="mdl-cell mdl-cell--3-col"></div>
+        <div class="mdl-cell mdl-cell--3-col"></div>
+        <div class="mdl-cell mdl-cell--3-col">
+          <router-link v-bind:to="'/nots/' + tailorId + '/products'" exact>
+            <button class="mdl-button mdl-js-button mdl-js-ripple-effect">
+               <i class="material-icons">keyboard_backspace</i>
+               Back to RTW
+            </button>
+          </router-link>
+        </div>
       </div>
       <!-- SELECT BOXES -->
       <div class="mdl-grid">
@@ -83,6 +88,7 @@
               <option>XL</option>
               <option>XXL</option>
               <option>XXXL</option>
+              <option>None</option>
             </select>
             </p>
       </div>
@@ -117,7 +123,7 @@
       </div>
       <!-- IMAGE UPLOAD -->
       <div>
-        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored" v-on:click="onPickfile" accept="image/*">
+        <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent" v-on:click="onPickfile" accept="image/*">
           Upload Image
         </button>
         <input type="file" style="display: none" ref="fileInput" v-on:change="onFilePicked">
@@ -139,18 +145,20 @@
           </button>
           <!-- PROMPT DIALOG -->
           <dialog ref="promptDialog" class="mdl-dialog">
-            <p class="mdl-dialog__title">Are you sure about the information you entered?</p>
+            <h4 class="mdl-dialog__title">Are you sure about the information you entered?</h4>
             <div class="mdl-dialog__content">
               *The information (except the Stock) you entered can't be edited later, after you posted
             </div>
-            <div class="mdl-dialog__actions">
-                <div v-if="isPosting" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
-                <button v-else class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="post">
+            <div v-if="isPosting" class="mdl-dialog__actions">
+              <h4>Adding Product... Please Wait...</h4>
+            </div>
+            <div v-else class="mdl-dialog__actions">
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="post">
                   YES
                 </button>
-              <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="closeDialog">
-                Back
-              </button>
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="closeDialog">
+                  Back
+                </button>
             </div>
           </dialog>
       </div>
@@ -182,7 +190,7 @@ export default {
         rtwImg: "",
         fabric: "",
         size: "",
-        reserved: 0,
+        reserved: "0",
         type: "",
         tailorName: "",
         tailor_id: this.$route.params.id
@@ -200,27 +208,26 @@ export default {
         .then((data) => {
           key = data.key
           return key
-          console.log("1st then")
         })
         .then(key => {
           const filename = this.image.name
           const ext = filename.slice(filename.lastIndexOf('.'))
           return this.$firebase.storage().ref('rtws/' + key + '.' + ext).put(this.image)
-          console.log("2nd then")
         })
         .then(fileData => {
           imageUrl = fileData.metadata.downloadURLs[0]
           return this.$firebase.database().ref('ready_to_wears').child(key).update({rtwImg: imageUrl, rwtId: key, tailorName: this.tailorData.tName})
-          console.log("3rd then")
         }).then(function(){
           alert("Product Added");
         }).then(function(){
-          goTo.push({ name: 'rtws', params: { id: tailorId }});
-          console.log("4th then")
+          goTo.push({ name: 'rtws', params: { id: tailorId }})
         });
     },
     prompt: function(){
-      this.$refs.promptDialog.showModal();
+      if(this.entryComplete)
+        this.$refs.promptDialog.showModal();
+      else
+        alert("COMPLETE ALL REQUIRED INPUTS!");
     },
     closeDialog: function(){
       this.$refs.promptDialog.close();
@@ -240,6 +247,23 @@ export default {
       })
       fileReader.readAsDataURL(files[0]);
       this.image = files[0];
+    }
+  },
+  computed: {
+    entryComplete: function(){
+      if(
+        (this.ready_to_wear.rtwDescription == "") ||
+        (this.ready_to_wear.rtwPrice == "") ||
+        (this.ready_to_wear.rtwColor == "") ||
+        (this.ready_to_wear.rtwStock == "") ||
+        (this.ready_to_wear.rtwImg == "") ||
+        (this.ready_to_wear.fabric == "") ||
+        (this.ready_to_wear.size == "") ||
+        (this.ready_to_wear.type == "")
+      )
+        return false;
+      else
+        return true;
     }
   },
   beforeCreate() {

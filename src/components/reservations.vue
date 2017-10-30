@@ -2,7 +2,7 @@
   <div>
     <!-- BEGIN TEMPLATE -->
   <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
     <header class="mdl-layout__header">
       <div class="mdl-layout__header-row">
         <h3>Welcome To Naga Online Tailoring Services</h3>
@@ -55,8 +55,16 @@
         <h5>Reservations for RTWs</h5>
       </div>
       <div class="mdl-grid">
-        Search by Customer:
-        <input type="text" v-model="search">
+        <div class="mdl-cell mdl-cell--3-col">
+          Search by Customer:
+          <input type="text" v-model="search">
+        </div>
+        <div class="mdl-cell mdl-cell--3-col">
+          Search by Product Type:
+          <input type="text" v-model="typeSearch">
+        </div>
+        <div class="mdl-cell mdl-cell--3-col"></div>
+        <div class="mdl-cell mdl-cell--3-col"></div>
       </div>
       <div class="mdl-grid">
         <!-- RESERVATIONS LIST -->
@@ -66,32 +74,32 @@
             <th class="mdl-data-table__cell--non-numeric">Product Type</th>
             <th>Customer</th>
             <th>Quantity</th>
-            <th>Date Submitted</th>
-            <th>Expiration date</th>
+            <th>Date Submitted<br>(YYYY-MM-DD)</th>
+            <th>Expiration date<br>(YYY-MM-DD)</th>
             <th>
               Status:
               <select v-model="statSearch">
                 <option>All</option>
                 <option>Pending</option>
                 <option>Reserved</option>
-                <option>Rejected</option>                
                 <option>Completed</option>
                 <option>Cancelled</option>
               </select>
             </th>
-            <th>Reserve/Reject</th>
+            <th></th>
           </thead>
           <tbody>
           <tr v-for="reservation, ndx in filteredRs">
             <td><img :src="reservation.Product_image" height="150"></td>
-            <td class="mdl-data-table__cell--non-numeric">
+            <td id="longLines" class="mdl-data-table__cell--non-numeric">
+              <template v-if="reservation.prodData">
               <p id="pType">{{ reservation.Product_name }}</p>
               <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showRTW(ndx)">
                 <i class="material-icons">info_outline</i>
               </button>
-              <!-- DIALOR FOR RTW INFO -->
-              <dialog id="rtwBox" class="mdl-dialog" ref="rtwDialog">
-                <p class="mdl-dialog__title">RTW Information</p>
+              <!-- DIALOG FOR RTW INFO -->
+              <dialog class="mdl-dialog" ref="rtwDialog">
+                <h4 class="mdl-dialog__title">RTW Information</h4>
                 <div class="mdl-dialog__content">
                   <div>
                     <img :src="reservation.Product_image" height="150">
@@ -108,15 +116,12 @@
                     </p>
                   </div>
                 </div>
-                <div class="mdl-dialog__actions">
-                  <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeRTW(ndx)">
-                    OK
-                  </button>
-                </div>
               </dialog>
+              </template>
+              <template v-else>RTW has been deleted!</template>
             </td>
             <td>
-              {{ reservation.userData && reservation.userData.Account_username }}
+              {{ reservation.userData && reservation.userData.Account_name }}
               <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showInfo(ndx)">
                 <i class="material-icons">info_outline</i>
               </button>
@@ -129,7 +134,7 @@
                   </div>
                   <div>
                     <p>
-                      Name: {{ reservation.userData.Account_username }}<br>
+                      Name: {{ reservation.userData.Account_name }}<br>
                       Contact Number: {{ reservation.userData.Phone_number }}<br>
                       Email Address: {{ reservation.userData.Email_address }}<br>
                       Address: {{ reservation.userData.Address }}
@@ -148,11 +153,15 @@
             <td id="longLines">{{ compDate(reservation.dateValid) }}</td>
             <td>{{ reservation.Status }}</td>
             <td class="mdl-data-table__cell--non-numeric">
-              <button v-if="reservation.Status=='Pending'" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showReserve(ndx)">
-                <i class="material-icons">done</i>
-              </button>
+              <template v-if="reservation.prodData">
+              <div v-if="reservation.Status=='Pending'">
+                <button  class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showAccept(ndx)">
+                  <i class="material-icons">done</i>
+                </button>
+                Accept
+              </div>
               <!-- DIALOG FOR RESERVE-->
-              <dialog id="reserve" class="mdl-dialog" ref="reserveDialog">
+              <dialog id="reserve" class="mdl-dialog" ref="acceptDialog">
                 <h4 v-if="canReserve(reservation.prodData.rtwStock, reservation.Quantity, reservation.prodData.reserved)" class="mdl-dialog__title">Accept Reservation for this Item?</h4>
                 <h4 v-else class="mdl-dialog__title">You cannot accept this reservation!</h4>
                 <div v-if="canReserve(reservation.prodData.rtwStock, reservation.Quantity, reservation.prodData.reserved)" class="mdl-dialog__content">
@@ -165,8 +174,9 @@
                       Color: {{ reservation.prodData.rtwColor }}<br>
                       Fabric: {{ reservation.prodData.fabric }}<br>
                       Number of Stock: {{ reservation.prodData.rtwStock }}<br><br>
-                      Reserved by {{ reservation.userData.Account_username }} on {{ reservation.Date_ordered }}<br>
-                      Reservation Quantity: {{ reservation.Quantity }}
+
+                      Reserved by {{ reservation.userData.Account_name }} on {{ reservation.Date_ordered }}<br>
+                      Reservation Quantity: {{ reservation.Quantity }}<br>
                     </p>
                   </div>
                   <hr>
@@ -187,7 +197,7 @@
                       Color: {{ reservation.prodData.rtwColor }}<br>
                       Fabric: {{ reservation.prodData.fabric }}<br>
                       Number of Stock: {{ reservation.prodData.rtwStock }}<br><br>
-                      Reserved by {{ reservation.userData.Account_username }} on {{ reservation.Date_ordered }}<br>
+                      Reserved by {{ reservation.userData.Account_name }} on {{ reservation.Date_ordered }}<br>
                       Reservation Quantity: {{ reservation.Quantity }}
                     </p>
                   </div>
@@ -207,45 +217,6 @@
                     Reserve
                   </button>
                   <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeReserve(ndx)">
-                    Cancel
-                  </button>
-                </div>
-              </dialog>
-              <button v-if="reservation.Status=='Pending'" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showReject(ndx)">
-                <i class="material-icons">block</i>
-              </button>
-              <!-- DIALOG FOR REJECT -->
-              <dialog id="reject" class="mdl-dialog" ref="rejectDialog">
-                <h4 class="mdl-dialog__title">Reject this Reservation?</h4>
-                <div class="mdl-dialog__content">
-                  <div>
-                    <img :src="reservation.Product_image" height="150">
-                  </div>
-                  <div>
-                    <p>
-                      Type: {{ reservation.prodData.type }}<br>
-                      Color: {{ reservation.prodData.rtwColor }}<br>
-                      Fabric: {{ reservation.prodData.fabric }}<br>
-                      Number of Stock: {{ reservation.prodData.rtwStock }}<br><br>
-                      Reservation requested by {{ reservation.userData.Account_username }}<br>
-                      Reservation Quantity: {{ reservation.Quantity }}
-                    </p>
-                  </div>
-                  <hr>
-                  <p>
-                    <textarea rows="3" cols="50" placeholder="Enter your remarks here..." v-model="remarks">
-                    </textarea>
-                  </p>
-                </div>
-                <div v-if="isRejecting" class="mdl-dialog__actions">
-                  <div>Rejecting... Please Wait...</div>
-                </div>
-                <!-- REJECT ACTIONS -->
-                <div v-else class="mdl-dialog__actions">
-                  <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="reject(ndx, reservation.id)">
-                    Reject
-                  </button>
-                  <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click.prevent="closeReject(ndx)">
                     Cancel
                   </button>
                 </div>
@@ -304,7 +275,7 @@
                       Type: {{ reservation.prodData.type }}<br>
                       Color: {{ reservation.prodData.rtwColor }}<br>
                       Fabric: {{ reservation.prodData.fabric }}<br><br>
-                      Reservation Requested by {{ reservation.userData.Account_username }}<br>
+                      Reservation Requested by {{ reservation.userData.Account_name }}<br>
                       Reservation Quantity: {{ reservation.Quantity }}
                     </p>
                   </div>
@@ -322,6 +293,7 @@
                   </button>
                 </div>
               </dialog>
+              </template>
             </td>
           </tr>
           </tbody>
@@ -342,10 +314,10 @@ export default {
     return {
       isCancelling: false,
       isCompleting: false,
-      isRejecting: false,
       isReserving: false,
       isLoading: true,
       search: "",
+      typeSearch: "",
       statSearch: "Pending",
       tailorId: this.$route.params.id,
       tailorData: {},
@@ -371,14 +343,11 @@ export default {
       else
         return true;
     },
-    showReserve: function(diabox){
-      this.$refs.reserveDialog[diabox].showModal();
+    showAccept: function(diabox){
+      this.$refs.acceptDialog[diabox].showModal();
     },
     showRTW: function(diabox){
       this.$refs.rtwDialog[diabox].showModal();
-    },
-    showReject: function(diabox){
-      this.$refs.rejectDialog[diabox].showModal();
     },
     showComplete: function(diabox){
       this.$refs.completeDialog[diabox].showModal();
@@ -393,7 +362,7 @@ export default {
       let newDate = this.compDate(this.dateValid);
       let newReserved = parseInt(reserved) + parseInt(quantity);
       let firebase = this.$firebase;
-      if((newDate.lastIndexOf("EXPIRED") != -1) || (this.dateValid == ""))
+      if((newDate.lastIndexOf("EXPIRED") != -1) || (this.dateValid == "") || (this.dateValid.length > 10))
         alert("PLEASE INPUT A VALID DATE!");
       else{
         this.isReserving = true;
@@ -402,7 +371,7 @@ export default {
           dateValid: this.dateValid,
           Remarks: this.remarks
         }).then(function(){
-          return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved});
+          return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved.toString()});
         }).then(function(){
           location.reload();
         });
@@ -417,7 +386,7 @@ export default {
         Status: "Completed",
         dateValid: ""
       }).then(function(){
-        return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved, rtwStock: newStock});
+        return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved.toString(), rtwStock: newStock.toString()});
       }).then(function(){
         location.reload();
       });
@@ -425,37 +394,20 @@ export default {
     cancel: function(diabox, quantity, id, prodId, reserved){
       let newReserved = parseInt(reserved) - parseInt(quantity);
       let firebase = this.$firebase;
-      this.isCanceling = true;
+      this.isCancelling = true;
       firebase.database().ref('rtw_orders').child(id).update({
         Status: "Cancelled",
         dateValid: ""
       }).then(function(){
-        return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved});
+        return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved.toString()});
       }).then(function(){
         location.reload();
       });
     },
-    reject: function(diabox, id){
-      if(this.remarks == "")
-        alert("PLEASE ENTER REMARKS!");
-      else{
-        this.isRejecting = true;
-        this.$firebase.database().ref('rtw_orders').child(id).update({
-          Status: "Rejected",
-          Remarks: this.remarks
-        }).then(function(){
-          location.reload();
-        });
-      }
-    },
     closeReserve: function(diabox){
-      this.$refs.reserveDialog[diabox].close();
+      this.$refs.acceptDialog[diabox].close();
       this.remarks = "";
       this.dateValid = "";
-    },
-    closeReject: function(diabox){
-      this.$refs.rejectDialog[diabox].close();
-      this.remarks = "";
     },
     closeCancel: function(diabox){
       this.$refs.cancelDialog[diabox].close();
@@ -474,18 +426,17 @@ export default {
   computed: {
     filteredRs: function(){
       let search2;
-      let newArr;
       if(this.statSearch == "All")
         search2 = "";
       else
         search2 = this.statSearch;
-      newArr = this.reservations.filter((r) =>{
+      return this.reservations.filter((r) =>{
         return (
           r.Status.includes(search2) &&
-          r.userData.Account_username.toLowerCase().includes(this.search.toLowerCase())
+          r.userData.Account_name.toLowerCase().includes(this.search.toLowerCase()) &&
+          r.Product_name.toLowerCase().includes(this.typeSearch.toLowerCase())
         );
       });
-      return newArr.reverse();
     }
   },
   beforeCreate() {
@@ -518,7 +469,7 @@ export default {
           })
         }
       }
-      this.reservations = rtwArray.reverse();
+      this.reservations = rtwArray;
     }).then(function(){//RETRIEVE TAILOR DATA
       return this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json');
     }).then(function(data){
@@ -580,9 +531,6 @@ dialog p{
 .mdl-layout__header{
   background-color: #21C0C0;
 }
-.mdl-dialog__content{
-  font-size: 14pt;
-}
 #tailorAvatar {
   margin-top: 30px;
   width: 100px;
@@ -600,7 +548,6 @@ dialog p{
 #rtwBox{
   width: 25%;
   height: auto;
-  text-align: left;
 }
 #infoBox{
   width: 30%;

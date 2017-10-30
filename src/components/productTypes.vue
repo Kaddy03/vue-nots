@@ -2,7 +2,7 @@
   <div>
     <!-- BEGIN TEMPLATE -->
   <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
     <header class="mdl-layout__header">
       <div class="mdl-layout__header-row">
         <h3>Welcome To Naga Online Tailoring Services</h3>
@@ -67,8 +67,9 @@
                       <label class="mdl-textfield__label" for="pType">Product Type Name <span class="hint">(Pls Specify the GENDER for this type)</span></label>
                 </div>
                 <div id="ptNameInput" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                      <input class="mdl-textfield__input" type="text" id="pType" v-model="pType.ptPrice">
+                      <input class="mdl-textfield__input" type="text" id="pType" pattern="-?[0-9,]*(\.[0-9,]+)?" v-model="pType.ptPrice">
                       <label class="mdl-textfield__label" for="pType">Estimated Price for MTO</label>
+                      <span class="mdl-textfield__error">Input is not a number!</span>
                 </div>
                 <p>*Choose the required MTO measurements for this product type</p>
                 <!-- CHECKBOXES -->
@@ -172,16 +173,16 @@
                 </div>
               </div>
               <!-- ACTION BUTTONS -->
-              <div class="mdl-dialog__actions">
-                <div v-if="isPosting" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
-                <button v-else id="add" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="post">
+              <div v-if="isPosting" class="mdl-dialog__actions">
+                <div>Adding Product Type... Please Wait...</div>
+              </div>
+              <div v-else class="mdl-dialog__actions">
+                <button id="add" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="post">
                   <i class="material-icons">done</i>
                 </button>
-                <span for="add" class="mdl-tooltip">Add product type</span>
                 <button id="cancel" class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="closeDialog">
                   <i class="material-icons">clear</i>
                 </button>
-                <span for="cancel" class="mdl-tooltip">Cancel</span>
               </div>
             </dialog>
         </div>
@@ -189,21 +190,21 @@
         <div class="mdl-grid">
           <table class="mdl-data-table mdl-js-data-table">
             <thead>
-              <th class="mdl-data-table__cell--non-numeric">Product Type Names</th>
-              <th>Measurements for MTO</th>
+              <th>Product Type Names</th>
+              <th class="mdl-data-table__cell--non-numeric">Measurements for MTO</th>
               <th class="mdl-data-table__cell--non-numeric">Estimated price for MTO</th>
               <th></th>
             </thead>
             <tbody>
               <tr v-for="type, ndx in types">
-                <td class="mdl-data-table__cell--non-numeric">{{ type.ptName }}</td>
-                <td>
+                <td>{{ type.ptName }}</td>
+                <td class="mdl-data-table__cell--non-numeric">
                   <button class="mdl-button mdl-js-button mdl-js-ripple-effect" v-on:click="showMeasure(ndx)">
                     See Measurements
                   </button>
                   <!-- DIALOG FOR MEASUREMENTS -->
                   <dialog id="mDialog" class="mdl-dialog" ref="measureDialog">
-                    <div class="mdl-dialog__content">
+                    <div v-if="hasMeasurements(type)" class="mdl-dialog__content">
                       <table class="mdl-data-table mdl-js-data-table">
                         <thead>
                           <th>Measurements</th>
@@ -234,6 +235,9 @@
                         </tbody>
                       </table>
                     </div>
+                    <div id="longLines" v-else class="mdl-dialog__content">
+                      This Product Type has no Measurements
+                    </div>
                     <div class="mdl-dialog__actions">
                       <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeMeasure(ndx)">
                         Back
@@ -242,7 +246,7 @@
                   </dialog>
                 </td>
                 <td class="mdl-data-table__cell--non-numeric"><span>&#8369;</span>{{ type.ptPrice }}</td>
-                <td>
+                <td class="mdl-data-table__cell--non-numeric">
                   <button id="edit" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showEdit(ndx)">
                     <i class="material-icons">mode_edit</i>
                   </button>
@@ -273,7 +277,7 @@
                           <input type="checkbox" v-model="type.breast_point"> Breast Point<br>
                           <input type="checkbox" v-model="type.waist_point"> Waist Point<br>
                           <input type="checkbox" v-model="type.stomach"> Stomach<br>
-                          <input type="checkbox" v-model="type.waist_uppert"> Waist (upper))<br>
+                          <input type="checkbox" v-model="type.waist_upper"> Waist (upper)<br>
                         </div>
                         <!-- LOWER -->
                         <div class="mdl-cell mdl-cell--6-col">
@@ -289,9 +293,11 @@
                         </div>
                       </div>
                       <p class="hint">(Changes will not affect previous RTWs, RTW reservations, and MTO orders<br>that involves this product type)</p>
-                      <div class="mdl-dialog__actions">
-                        <div v-if="isEditing" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
-                        <button v-else class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="edit(ndx, type.id, type)">
+                      <div v-if="isEditing" class="mdl-dialog__actions">
+                        <div>Editing Product Type... Please Wait...</div>
+                      </div>
+                      <div v-else class="mdl-dialog__actions">
+                        <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click="edit(ndx, type.id, type)">
                           <i class="material-icons">done</i>
                         </button>
                         <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click="closeEdit(ndx)">
@@ -309,9 +315,11 @@
                     <div class="mdl-dialog__content">
                       This product type will still exist in previous RTWs, RTW reservations, and MTO orders.
                     </div>
-                    <div class="mdl-dialog__actions">
-                      <div v-if="isDeleting" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
-                      <button v-else class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click.prevent="ptDelete(type.id)">
+                    <div v-if="isDeleting" class="mdl-dialog__actions">
+                      <div>Deleting Product Type... Please Wait...</div>
+                    </div>
+                    <div v-else class="mdl-dialog__actions">
+                      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click.prevent="ptDelete(type.id)">
                         Delete
                       </button>
                       <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeDelete(ndx)">
@@ -374,23 +382,57 @@ export default {
     }
   },
   methods: {
+    hasMeasurements(type){
+      if(
+        type.bicep ||
+        type.arm_Hole ||
+        type.chest ||
+        type.neck ||
+        type.shirt_length ||
+        type.short_sleeve_length ||
+        type.long_sleeve_length ||
+        type.shoulder_width ||
+        type.bust ||
+        type.breast_point ||
+        type.waist_point ||
+        type.stomach ||
+        type.waist_upper ||
+        type.wrist ||
+        type.waist_lower ||
+        type.hips_lower ||
+        type.crotch ||
+        type.thigh_width ||
+        type.pants_length ||
+        type.inseam ||
+        type.knee ||
+        type.half_Hem
+      )
+        return true;
+      else
+        return false;
+    },
     showDialog: function(){
       this.$refs.addDialog.showModal();
     },
     post: function(){
-      this.isPosting = true
-      this.$http.post('https://nots-76611.firebaseio.com/product_types.json', this.pType).then(function(){
-        alert("Product Type Added");
-      }).then(function(){
-        location.reload();
-      });
+      if(this.pType.ptPrice == "")
+        alert("PLEASE INPUT A PRICE!");
+      else if(this.pType.ptName == "")
+        alert("PLEASE INPUT A NAME");
+      else{
+        this.isPosting = true
+        this.$http.post('https://nots-76611.firebaseio.com/product_types.json', this.pType).then(function(){
+          alert("PRODUCT TYPE ADDED");
+        }).then(function(){
+          location.reload();
+        });
+      }
     },
     edit: function(diag, id, data){
-      let diaBox = this.$refs.editDialog[diag];
       this.isEditing = true;
       this.$firebase.database().ref('product_types').child(id).update(data).then(function(){
-        diaBox.close();
-      })
+        location.reload(true);
+      });
     },
     ptDelete: function(id){
       this.isDeleting = true;
@@ -411,7 +453,7 @@ export default {
       this.$refs.deleteDialog[diag].showModal();
     },
     closeEdit: function(diag){
-      this.$refs.editDialog[diag].close();
+      location.reload(true);
     },
     closeDelete: function(diag){
       this.$refs.deleteDialog[diag].close();
@@ -485,7 +527,8 @@ td button{
   padding-left: 20px;
 }
 .mdl-data-table{
-  width: 50%;
+  table-layout: fixed;
+  width: 100%;
 }
 .mdl-button{
   margin-left: 0;
@@ -537,6 +580,9 @@ td button{
 #mDialog{
   width: 15%;
   height: auto;
+}
+#longLines{
+  white-space: pre-line;
 }
 
 

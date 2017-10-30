@@ -2,7 +2,7 @@
   <div>
     <!-- BEGIN TEMPLATE -->
   <div v-if="isLoading" id="p2" class="mdl-progress mdl-js-progress mdl-progress__indeterminate"></div>
-  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer">
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-drawer mdl-layout--fixed-header">
     <header class="mdl-layout__header">
       <div class="mdl-layout__header-row">
         <h3>Welcome To Naga Online Tailoring Services</h3>
@@ -76,9 +76,6 @@
                   Product Type
                 </th>
                 <th class="mdl-data-table__cell--non-numeric">
-                  Fabric
-                </th>
-                <th class="mdl-data-table__cell--non-numeric">
                   Size
                   <!-- SIZE FILTER -->
                   <select v-model="sizeSearch">
@@ -92,6 +89,7 @@
                     <option>XL</option>
                     <option>XXL</option>
                     <option>XXXL</option>
+                    <option>None</option>
                   </select>
                 </th>
                 <th>Price</th>
@@ -102,15 +100,25 @@
             </thead>
             <tbody>
               <tr v-for="rtw, ndx in filteredProds">
-                <td class="mdl-data-table__cell--non-numeric">
-                  <img :src="rtw.rtwImg" height="150" v-on:click="showInfo(ndx)">
+                <td>
+                  <img :src="rtw.rtwImg" height="150">
                 </td>
                 <!-- DIALOG FOR INFO -->
                 <dialog id="RTWinfo" class="mdl-dialog" ref="infoDialog">
-                  <p class="mdl-dialog__content">RTW Information</p>
+                  <h4 class="mdl-dialog__title">RTW Information</h4>
                   <div class="mdl-dialog__content">
                     <img :src="rtw.rtwImg" height="250">
-                    <p>{{ rtw.rtwDescription }}</p>
+                    <div>
+                      <p>
+                        Type: {{ rtw.type }}
+
+                        Description:
+                        {{ rtw.rtwDescription }}
+
+                        Color: {{ rtw.rtwColor }}
+                        Fabric: {{ rtw.fabric }}
+                      </p>
+                    </div>
                   </div>
                   <div class="mdl-dialog__actions">
                     <button class="mdl-button mdl-js-button mdl-button--colored mdl-button--raised mdl-js-ripple-effect" v-on:click="closeInfo(ndx)">
@@ -118,8 +126,12 @@
                     </button>
                   </div>
                 </dialog>
-                <td id="pType" class="mdl-data-table__cell--non-numeric">{{ rtw.type }}</td>
-                <td class="mdl-data-table__cell--non-numeric">{{ rtw.fabric }}</td>
+                <td id="pType" class="mdl-data-table__cell--non-numeric">
+                  {{ rtw.type }}
+                  <button class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showInfo(ndx)">
+                    <i class="material-icons">info_outline</i>
+                  </button>
+                </td>
                 <td class="mdl-data-table__cell--non-numeric">{{ rtw.size }}</td>
                 <td><span>&#8369;</span>{{ rtw.rtwPrice }}</td>
                 <td>{{ rtw.reserved }}</td>
@@ -133,9 +145,11 @@
                     <div class="mdl-dialog__content">
                       <p>Edit Stock: <input type="text" v-model="rtw.rtwStock"></p>
                     </div>
-                    <div class="mdl-dialog__actions">
-                      <div v-if="isEditing" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
-                      <button v-else class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click="stockEdit(ndx, rtw, rtw.id)">
+                    <div v-if="isEditing" class="mdl-dialog__actions">
+                      <div>Editing Stock... Please Wait</div>
+                    </div>
+                    <div v-else class="mdl-dialog__actions">
+                      <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click="stockEdit(ndx, rtw.rtwStock, rtw.id, rtw.reserved)">
                         <i class="material-icons">done</i>
                       </button>
                       <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-js-ripple-effect mdl-button--colored" v-on:click="closeEdit(ndx)">
@@ -151,7 +165,7 @@
                   <!-- DIALOG FOR DELETE -->
                   <dialog id="deleteRTW" class="mdl-dialog" ref="deleteDialog">
                     <div v-if="rtw.reserved==0" class="mdl-dialog__title">
-                      Are you sure you want to delete this RTW?
+                      <h4>Are you sure you want to delete this RTW?</h4>
                     </div>
                     <div v-else class="mdl-dialog__title">
                       You can't Delete this RTW!
@@ -159,8 +173,10 @@
                     <div class="mdl-dialog__content">
                       <p v-if="rtw.reserved!=0"> There are {{ rtw.reserved }} reservations on this product. Complete those reservations first!</p>
                     </div>
-                    <div v-if="isDeleting" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
-                    <div class="mdl-dialog__actions">
+                    <div v-if="isDeleting" class="mdl-dialog__actions">
+                      <h4>Deleting Product... Please Wait...</h4>
+                    </div>
+                    <div v-else class="mdl-dialog__actions">
                       <button v-if="rtw.reserved==0" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="deleteRTW(rtw.id)">
                         Delete
                       </button>
@@ -201,19 +217,37 @@ export default {
     }
   },
   methods: {
-    stockEdit: function(diag, data, id){
+    stockEdit: function(diag, data, id, reserved){
       let diaBox = this.$refs.editDialog[diag];
-      let index = data;
-      let editing = this.isEditing;
-      this.isEditing = true;
-      this.$firebase.database().ref('ready_to_wears').child(id).update({rtwStock: index.rtwStock}).then(function(){
-        location.reload();
-      })
+      if(data < reserved)
+        alert("THE STOCK YOU ENTERED IS LOWER THAN THE NUMBER OF RESERVATIONS!");
+      else{
+        this.isEditing = true;
+        this.$firebase.database().ref('ready_to_wears').child(id).update({rtwStock: data}).then(function(){
+          location.reload();
+        });
+      }
     },
     deleteRTW: function(id){
       this.isDeleting = true;
-      this.$firebase.database().ref('ready_to_wears').child(id).remove().then(function(){
-        location.reload();
+      let firebase = this.$firebase;
+      let http = this.$http;
+      let prodId = id;
+      this.$firebase.database().ref('ready_to_wears').child(id).remove().then(function(data){
+        return http.get('https://nots-76611.firebaseio.com/rtw_orders.json');
+      }).then(function(data){
+        return data.json();
+      }).then(function(data){
+        let orderKey;
+        for (let key in data){
+          if(data[key].Product_uid == prodId)
+            orderKey = key;
+        }
+        return orderKey;
+      }).then(function(orderKey){
+        return firebase.database().ref('rtw_orders').child(orderKey).update({Remarks: 'This RTW has been deleted!'});
+      }).then(function(){
+        location.reload(true);
       });
     },
     showInfo: function(diag){
@@ -232,7 +266,7 @@ export default {
       this.$refs.deleteDialog[diag].close();
     },
     closeEdit: function(diag){
-      this.$refs.editDialog[diag].close();
+      location.reload();
     }
   },
   computed: {
@@ -270,7 +304,7 @@ export default {
             rtwArray.push(data[key]);
         }
       }
-      this.rtws = rtwArray.reverse();
+      this.rtws = rtwArray;
     }).then(function(){//RETRIEVE TAILOR DATA
       return this.$http.get('https://nots-76611.firebaseio.com/tailors/' + this.tailorId + '.json');
     }).then(function(data){
@@ -297,6 +331,12 @@ h5{
 li, a{
   text-decoration: none;
   color: white;
+}
+dialog{
+  text-align: left;
+}
+dialog p{
+  font-size: 14pt;
 }
 .drawerHeader{
   background-color: #3f51b5;

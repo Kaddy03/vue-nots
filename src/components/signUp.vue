@@ -154,7 +154,7 @@ export default {
           })
           .then(key => {
             const filename = this.image.name
-            const ext = filename.slice(filename.lastIndexOf('.'))
+            const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase()
             return this.$firebase.storage().ref('tailors/' + key + '.' + ext).put(this.image)
           })
           .then(fileData => {

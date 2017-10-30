@@ -23,9 +23,21 @@
           <!-- TAILOR'S PICTURE -->
           <div class="mdl-grid">
             <h4>TAILOR'S STORE FRONT</h4>
-          </div class="mdl-grid">
+            <button class="mdl-button mdl-js-button mdl-button--fab mdl-js-ripple-effect mdl-button--colored" v-on:click="onPickfile" accept="image/*">
+              <i class="material-icons">mode_edit</i>
+            </button>
+            <input type="file" style="display: none" ref="fileInput" v-on:change="onFilePicked">
+          </div>
           <div>
             <img v-bind:src="tailorData.tImage" height="350">
+          </div>
+          <div v-if="isChanging" class="mdl-grid">
+            <h3>Changing Image.... Please Wait...</h3>
+          </div>
+          <div v-else class="mdl-grid">
+            <button v-if="imageChanged" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="editImg">
+              Save changed image
+            </button>
           </div>
         </div>
         <div id="tailorInfo" class="mdl-cell mdl-cell--6-col">
@@ -49,9 +61,11 @@
                 <p>Store Hours: <input type="text" v-model="tailorData.tWork"></p>
                 <p>Contact Number: <input type="text" v-model="tailorData.tContact" pattern="[+0-9]{11,13}$" title="Valid Cellphone Number"></p>
               </div>
-              <div class="mdl-dialog__actions">
-                <div v-if="isEditing" class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
-                <button v-else class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="edit(tailorData)">
+              <div v-if="isEditing" class="mdl-dialog__actions">
+                <h3>Editing Information.... Please Wait...</h3>
+              </div>
+              <div v-else class="mdl-dialog__actions">
+                <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="edit(tailorData)">
                   Save Changes
                 </button>
                 <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeInfo">
@@ -75,7 +89,6 @@
         </div>
       </div>
     </div>
-
     <!-- END TEMPLATE -->
   </div>
 </template>
@@ -86,6 +99,8 @@
 export default {
   data () {
     return {
+      imageChanged: false,
+      isChanging: false,
       isEditing: false,
       isLoading: true,
       tailorId: this.$route.params.id,
@@ -107,6 +122,44 @@ export default {
     closeInfo: function(){
       this.$refs.infoDialog.close();
       location.reload(true);
+    },
+    editImg: function(){
+      let image = this.image
+      let imageUrl
+      let tImg = this.tailorData.tImage
+      let key = this.$route.params.id
+      let firebase = this.$firebase
+      const filename = this.image.name
+      const ext = filename.slice(filename.lastIndexOf('.')).toLowerCase()
+      this.isChanging = true
+      this.$firebase.storage().ref('tailors/' + key + '.' + ext).delete()
+        .then(function(){
+          return firebase.storage().ref('tailors/' + key + '.' + ext).put(image)
+        })
+        .then(fileData => {
+          imageUrl = fileData.metadata.downloadURLs[0]
+          return firebase.database().ref('tailors').child(key).update({tImage: imageUrl})
+        }).then(function(){
+          alert("STORE FRONT CHANGED!");
+          location.reload(true);
+        });
+    },
+    onPickfile: function(){
+      this.$refs.fileInput.click();
+    },
+    onFilePicked (event){
+      const files = event.target.files;
+      let filename = files[0].name;
+      if (filename.lastIndexOf('.') <= 0){
+        return alert('Please add a valid file!');
+      }
+      const fileReader = new FileReader();
+      fileReader.addEventListener('load', () => {
+        this.tailorData.tImage = fileReader.result;
+      })
+      fileReader.readAsDataURL(files[0]);
+      this.image = files[0];
+      this.imageChanged = true;
     }
   },
   computed: {
