@@ -86,6 +86,39 @@
             STORE HOURS: {{ tailorData.tWork }}<br><br>
             CONTACT NUMBER: {{ tailorData.tContact }}
           </div>
+          <div class="mdl-grid">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="editAcct">
+              <i class="material-icons">mode_edit</i> Change username/password
+            </button>
+          </div>
+          <!-- DIALOG FOR ACCT INFO -->
+          <dialog id="acctDialog" class="mdl-dialog" ref="acctDialog">
+            <div class="mdl-dialog__content">
+              <div>
+                <h4>Edit Username</h4>
+                <hr>
+                Username: <input type="text" v-model="tailorData.tUsername"></input>
+              </div>
+              <div>
+                <h4>Edit Password</h4>
+                <hr>
+                <p>Current Password: <input type="password" v-model="currentPword"></input></p>
+                <p>New Password: <input type="password" v-model="newPword"></input></p>
+                <p>Re-type new Password: <input type="password" v-model="newPword2"></input></p>
+              </div>
+            </div>
+            <div v-if="isAcctChange" class="mdl-dialog__actions">
+              <div>Changing Account Information.... Please Wait...</div>
+            </div>
+            <div v-else class="mdl-dialog__actions">
+              <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeAcct">
+                Cancel
+              </button>
+              <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="changeAcct">
+                save changes
+              </button>
+            </div>
+          </dialog>
         </div>
       </div>
     </div>
@@ -100,9 +133,13 @@ export default {
   data () {
     return {
       imageChanged: false,
+      isAcctChange: false,
       isChanging: false,
       isEditing: false,
       isLoading: true,
+      currentPword: "",
+      newPword: "",
+      newPword2: "",
       tailorId: this.$route.params.id,
       image: null,
       tailorData: {}
@@ -112,6 +149,9 @@ export default {
     editInfo: function(){
       this.$refs.infoDialog.showModal();
     },
+    editAcct: function(){
+      this.$refs.acctDialog.showModal();
+    },
     edit: function(data){
       this.isEditing = true;
       let id = this.$route.params.id;
@@ -119,8 +159,30 @@ export default {
         location.reload(true);
       });
     },
+    changeAcct: function(){
+      let id = this.$route.params.id;
+      if((this.currentPword == "") && (this.newPword == "") && (this.newPword2 == ""))
+        alert("COMPLETE ALL THE REQUIRED INPUTS!")
+      else if(this.currentPword != this.tailorData.tPassword)
+        alert("YOUR CURRENT PASSWORD IS INCORRECT!")
+      else if(this.newPword != this.newPword2)
+        alert("NEW PASSWORD DOESN'T MATCH!")
+      else{
+        this.isAcctChange = true;
+        this.$firebase.database().ref('tailors').child(id).update({
+          tUsername: this.tailorData.tUsername,
+          tPassword: this.newPword
+        }).then(function(){
+          location.reload(true);
+        });
+      }
+    },
     closeInfo: function(){
       this.$refs.infoDialog.close();
+      location.reload(true);
+    },
+    closeAcct: function(){
+      this.$refs.acctDialog.close();
       location.reload(true);
     },
     editImg: function(){

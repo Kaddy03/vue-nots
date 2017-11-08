@@ -35,6 +35,9 @@
       </p>
     </div>
     <nav class="mdl-navigation">
+      <router-link v-bind:to="'/nots/' + tailorId + '/calendar'" exact>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">date_range</i> Calendar</span>
+      </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
         <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Requests</span>
       </router-link>
@@ -102,16 +105,16 @@
         </div>
         <div class="mdl-cell mdl-cell--3-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" pattern="-?[0-9,]*(\.[0-9,]+)?" id="rtwPrice" v-model="ready_to_wear.rtwPrice">
+            <input class="mdl-textfield__input" type="text" pattern="\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?" id="rtwPrice" v-model="ready_to_wear.rtwPrice">
             <label class="mdl-textfield__label" for="rtwPrice">Price</label>
-            <span class="mdl-textfield__error">Input is not a number!</span>
+            <span class="mdl-textfield__error">Invalid Price!</span>
           </div>
         </div>
         <div class="mdl-cell mdl-cell--3-col">
           <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="text" pattern="-?[0-9,]*(\.[0-9,]+)?" id="rtwStock" v-model="ready_to_wear.rtwStock">
+            <input class="mdl-textfield__input" type="text" pattern="\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?" id="rtwStock" v-model="ready_to_wear.rtwStock">
             <label class="mdl-textfield__label" for="rtwStock">Number of Stock</label>
-            <span class="mdl-textfield__error">Input is not a number!</span>
+            <span class="mdl-textfield__error">Invalid Number of Stock!</span>
           </div>
         </div>
         <div class="mdl-cell mdl-cell--3-col">
@@ -191,6 +194,7 @@ export default {
         fabric: "",
         size: "",
         reserved: "0",
+        pending: "0",
         type: "",
         tailorName: "",
         tailor_id: this.$route.params.id

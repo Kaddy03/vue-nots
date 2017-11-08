@@ -34,6 +34,9 @@
       </p>
     </div>
     <nav class="mdl-navigation">
+      <router-link v-bind:to="'/nots/' + tailorId + '/calendar'" exact>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">date_range</i> Calendar</span>
+      </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
         <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Requests</span>
       </router-link>
@@ -71,19 +74,39 @@
         <table class="mdl-data-table mdl-js-data-table">
           <thead>
             <th>RTW Image</th>
-            <th class="mdl-data-table__cell--non-numeric">Product Type</th>
-            <th>Customer</th>
-            <th>Quantity</th>
-            <th>Date Submitted<br>(YYYY-MM-DD)</th>
-            <th>Expiration date<br>(YYY-MM-DD)</th>
+            <th class="mdl-data-table__cell--non-numeric">
+              Product Types<br>
+              <button v-on:click="sortTypeAsc">Asc</button>
+              <button v-on:click="sortTypeDesc">Desc</button>
+            </th>
+            <th class="mdl-data-table__cell--non-numeric">
+              Customer<br>
+              <button v-on:click="sortCustomerAsc">Asc</button>
+              <button v-on:click="sortCustomerDesc">Desc</button>
+            </th>
+            <th class="mdl-data-table__cell--non-numeric">
+              Quantity<br>
+              <button v-on:click="sortQuantityAsc">Asc</button>
+              <button v-on:click="sortQuantityDesc">Desc</button></th>
             <th>
-              Status:
+              Date Submitted<br>(YYYY-MM-DD)<br>
+              <button v-on:click="sortDateSubAsc">Asc</button>
+              <button v-on:click="sortDateSubDesc">Desc</button>
+            </th>
+            <th>
+              Expiration date<br>(YYY-MM-DD)<br>
+              <button v-on:click="sortDateValidAsc">Asc</button>
+              <button v-on:click="sortDateValidDesc">Desc</button>
+            </th>
+            <th class="mdl-data-table__cell--non-numeric">
+              Status: <br>
               <select v-model="statSearch">
                 <option>All</option>
                 <option>Pending</option>
                 <option>Reserved</option>
                 <option>Completed</option>
                 <option>Cancelled</option>
+                <option>Expired</option>
               </select>
             </th>
             <th></th>
@@ -150,7 +173,7 @@
             </td>
             <td>{{ reservation.Quantity }}</td>
             <td>{{ reservation.Date_ordered }}</td>
-            <td id="longLines">{{ compDate(reservation.dateValid) }}</td>
+            <td id="longLines">{{ reservation.prodData && compDate(reservation.dateValid, reservation.Quantity, reservation.id, reservation.Product_uid, reservation.prodData.reserved) }}</td>
             <td>{{ reservation.Status }}</td>
             <td class="mdl-data-table__cell--non-numeric">
               <template v-if="reservation.prodData">
@@ -327,11 +350,49 @@ export default {
     }
   },
   methods: {
-    compDate: function(date){
+    sortDateSubAsc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'Date_ordered', 'asc');
+    },
+    sortDateSubDesc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'Date_ordered', 'desc');
+    },
+    sortDateValidAsc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'dateValid', 'asc');
+    },
+    sortDateValidDesc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'dateValid', 'desc');
+    },
+    sortTypeAsc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'Product_name', 'asc');
+    },
+    sortTypeDesc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'Product_name', 'desc');
+    },
+    sortCustomerAsc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'userData.Account_name', 'asc');
+    },
+    sortCustomerDesc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'userData.Account_name', 'desc');
+    },
+    sortQuantityAsc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'Quantity', 'asc');
+    },
+    sortQuantityDesc: function(){
+      this.reservations = this._.orderBy(this.reservations, 'Quantity', 'desc');
+    },
+    compDate: function(date, quantity, rId, prodId, reserved){
+      let id = rId;
+      let newReserved = parseInt(reserved) - parseInt(quantity);
+      let firebase = this.$firebase;
       let newDate;
       let status = this.$moment(date, "YYYY-MM-DD").fromNow();
-      if (status.lastIndexOf("ago") != -1)
-        newDate = date + "\n(EXPIRED)";
+      if ((status.lastIndexOf("ago") != -1) && (date != "")){
+        firebase.database().ref('rtw_orders').child(id).update({Status: "Expired", dateValid: "", orderIndicator: "true"}).then(function(){
+          return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved.toString()});
+        }).then(function(){
+          newDate = date;
+        });
+      }
       else
         newDate = date;
       return newDate;
@@ -369,7 +430,8 @@ export default {
         firebase.database().ref('rtw_orders').child(id).update({
           Status: "Reserved",
           dateValid: this.dateValid,
-          Remarks: this.remarks
+          Remarks: this.remarks,
+          orderIndicator: "true"
         }).then(function(){
           return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved.toString()});
         }).then(function(){
@@ -384,7 +446,8 @@ export default {
       this.isCompleting = true;
       firebase.database().ref('rtw_orders').child(id).update({
         Status: "Completed",
-        dateValid: ""
+        dateValid: "",
+        orderIndicator: "true"
       }).then(function(){
         return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved.toString(), rtwStock: newStock.toString()});
       }).then(function(){
@@ -397,7 +460,8 @@ export default {
       this.isCancelling = true;
       firebase.database().ref('rtw_orders').child(id).update({
         Status: "Cancelled",
-        dateValid: ""
+        dateValid: "",
+        orderIndicator: "true"
       }).then(function(){
         return firebase.database().ref('ready_to_wears').child(prodId).update({reserved: newReserved.toString()});
       }).then(function(){
@@ -426,10 +490,12 @@ export default {
   computed: {
     filteredRs: function(){
       let search2;
+      //STATUS SEARCH
       if(this.statSearch == "All")
         search2 = "";
       else
         search2 = this.statSearch;
+      //APPLY FILTERS
       return this.reservations.filter((r) =>{
         return (
           r.Status.includes(search2) &&

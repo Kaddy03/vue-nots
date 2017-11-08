@@ -86,7 +86,7 @@
         <div class="mdl-cell mdl-cell--9-col">
           <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-1">
             <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input" v-model="accepted">
-            <span class="mdl-checkbox__label">I have read the <a>Terms and Conditions</a></span>
+            <span class="mdl-checkbox__label">I have read the <a v-on:click="showTaC">Terms and Conditions</a></span>
           </label>
         </div>
         <div class="mdl-cell mdl-cell--3-col">
@@ -131,6 +131,10 @@ export default {
     }
   },
   methods: {
+    showTaC: function(){
+      var pdf = '/src/assets/TaC.pdf';
+      window.open(pdf);
+    },
     post: function(){
       let load = this.signingUp;
       let imageUrl

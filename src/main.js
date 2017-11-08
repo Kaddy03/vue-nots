@@ -5,11 +5,14 @@ import moment from 'moment'
 import * as firebase from 'firebase'
 import App from './App.vue'
 import Routes from './routes'
+import lodash from 'lodash'
+import VueLodash from 'vue-lodash'
 
 Vue.use(VueResource);
 Vue.prototype.$moment = moment;
 Vue.use(VueRouter);
 Vue.prototype.$firebase = firebase;
+Vue.use(VueLodash, lodash);
 
 const router = new VueRouter({
   routes: Routes,

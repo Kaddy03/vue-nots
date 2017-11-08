@@ -66,7 +66,7 @@ export default {
         return;
       }
       else{
-        this.$router.push({ name: 'orders', params: { id: this.currentUser }});
+        this.$router.push({ name: 'calendar', params: { id: this.currentUser }});
       }
     }
   },

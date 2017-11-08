@@ -34,6 +34,9 @@
       </p>
     </div>
     <nav class="mdl-navigation">
+      <router-link v-bind:to="'/nots/' + tailorId + '/calendar'" exact>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">date_range</i> Calendar</span>
+      </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
         <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Requests</span>
       </router-link>
@@ -52,7 +55,7 @@
   <main class="mdl-layout__content">
     <div class="page-content">
         <div class="mdl-grid">
-          <h5>My Product Types</h5>
+          <h5>My Product types</h5>
         </div>
         <div class="mdl-grid">
             <button class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--colored" v-on:click.prevent="showDialog">
@@ -64,7 +67,7 @@
               <div class="mdl-dialog__content">
                 <div id="ptNameInput" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                       <input class="mdl-textfield__input" type="text" id="pType" v-model="pType.ptName">
-                      <label class="mdl-textfield__label" for="pType">Product Type Name <span class="hint">(Pls Specify the GENDER for this type)</span></label>
+                      <label class="mdl-textfield__label" for="pType">Product Type Name<span class="hint">(Pls Specify the GENDER for this type)</span></label>
                 </div>
                 <div id="ptNameInput" class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
                       <input class="mdl-textfield__input" type="text" id="pType" pattern="-?[0-9,]*(\.[0-9,]+)?" v-model="pType.ptPrice">
@@ -245,7 +248,7 @@
                     </div>
                   </dialog>
                 </td>
-                <td class="mdl-data-table__cell--non-numeric"><span>&#8369;</span>{{ type.ptPrice }}</td>
+                <td class="mdl-data-table__cell--non-numeric">{{ type.ptPrice }}.00</td>
                 <td class="mdl-data-table__cell--non-numeric">
                   <button id="edit" class="mdl-button mdl-js-button mdl-button--icon" v-on:click="showEdit(ndx)">
                     <i class="material-icons">mode_edit</i>

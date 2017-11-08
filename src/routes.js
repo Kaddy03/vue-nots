@@ -7,6 +7,7 @@ import orders from './components/orders.vue';
 import addProducts from './components/addProducts.vue';
 import productTypes from './components/productTypes.vue';
 import reservations from './components/reservations.vue';
+import calendar from './components/calendar.vue';
 
 export default [
   { path: '/nots', component: logIn },
@@ -17,6 +18,6 @@ export default [
   { path: '/nots/:id/orders', name: 'orders', component: orders },
   { path: '/nots/:id/productTypes', component: productTypes },
   { path: '/nots/:id/reservations', component: reservations },
+  { path: '/nots/:id/calendar', name: 'calendar', component: calendar },
   { path: '/nots/:id/products/addProducts', component: addProducts }
-
 ]

@@ -34,6 +34,9 @@
       </p>
     </div>
     <nav class="mdl-navigation">
+      <router-link v-bind:to="'/nots/' + tailorId + '/calendar'" exact>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">date_range</i> Calendar</span>
+      </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
         <span class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Requests</span>
       </router-link>
@@ -133,7 +136,7 @@
                   </button>
                 </td>
                 <td class="mdl-data-table__cell--non-numeric">{{ rtw.size }}</td>
-                <td><span>&#8369;</span>{{ rtw.rtwPrice }}</td>
+                <td>{{ rtw.rtwPrice }}.00</td>
                 <td>{{ rtw.reserved }}</td>
                 <td id="stockEdit">
                   {{ rtw.rtwStock }}
@@ -164,20 +167,16 @@
                   </button>
                   <!-- DIALOG FOR DELETE -->
                   <dialog id="deleteRTW" class="mdl-dialog" ref="deleteDialog">
-                    <div v-if="rtw.reserved==0" class="mdl-dialog__title">
+                    <div class="mdl-dialog__title">
                       <h4>Are you sure you want to delete this RTW?</h4>
                     </div>
-                    <div v-else class="mdl-dialog__title">
-                      You can't Delete this RTW!
-                    </div>
                     <div class="mdl-dialog__content">
-                      <p v-if="rtw.reserved!=0"> There are {{ rtw.reserved }} reservations on this product. Complete those reservations first!</p>
                     </div>
                     <div v-if="isDeleting" class="mdl-dialog__actions">
                       <h4>Deleting Product... Please Wait...</h4>
                     </div>
                     <div v-else class="mdl-dialog__actions">
-                      <button v-if="rtw.reserved==0" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="deleteRTW(rtw.id)">
+                      <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent mdl-js-ripple-effect" v-on:click="deleteRTW(rtw.id)">
                         Delete
                       </button>
                       <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored mdl-js-ripple-effect" v-on:click="closeDelete(ndx)">
@@ -245,7 +244,7 @@ export default {
         }
         return orderKey;
       }).then(function(orderKey){
-        return firebase.database().ref('rtw_orders').child(orderKey).update({Remarks: 'This RTW has been deleted!'});
+        return firebase.database().ref('rtw_orders').child(orderKey).update({Remarks: 'This RTW has been deleted!', Status: "Cancelled"});
       }).then(function(){
         location.reload(true);
       });

@@ -34,6 +34,9 @@
       </p>
     </div>
     <nav class="mdl-navigation">
+      <router-link v-bind:to="'/nots/' + tailorId + '/calendar'" exact>
+        <span class="mdl-navigation__link" href=""><i class="material-icons">date_range</i> Calendar</span>
+      </router-link>
       <router-link v-bind:to="'/nots/' + tailorId + '/orders'" exact>
         <span id="currentNav" class="mdl-navigation__link" href=""><i class="material-icons">content_cut</i> MTO Requests</span>
       </router-link>
@@ -70,14 +73,34 @@
         <table class="mdl-data-table mdl-js-data-table">
           <thead>
             <th>Reference</th>
-            <th>Product type</th>
-            <th>Measurements</th>
-            <th>Customer</th>
-            <th>Quantity</th>
-            <th>Date Submitted<br>(YYYY-MM-DD)</th>
-            <th>Finish Date<br>(YYYY-MM-DD)</th>
             <th>
-              Status:
+              Product type<br>
+              <button v-on:click="sortTypeAsc">Asc</button>
+              <button v-on:click="sortTypeDesc">Desc</button>
+            </th>
+            <th>Measurements</th>
+            <th class="mdl-data-table__cell--non-numeric">
+              Customer<br>
+              <button v-on:click="sortCustomerAsc">Asc</button>
+              <button v-on:click="sortCustomerDesc">Desc</button>
+            </th>
+            <th class="mdl-data-table__cell--non-numeric">
+              Quantity<br>
+              <button v-on:click="sortQuantityAsc">Asc</button>
+              <button v-on:click="sortQuantityDesc">Desc</button>
+            </th>
+            <th>
+              Date Submitted<br>(YYYY-MM-DD)<br>
+              <button v-on:click="sortDateSubAsc">Asc</button>
+              <button v-on:click="sortDateSubDesc">Desc</button>
+            </th>
+            <th>
+              Finish Date<br>(YYYY-MM-DD)<br>
+              <button v-on:click="sortDateFinishAsc">Asc</button>
+              <button v-on:click="sortDateFinishDesc">Desc</button>
+            </th>
+            <th class="mdl-data-table__cell--non-numeric">
+              Status<br>
               <select v-model="statSearch">
                 <option>All</option>
                 <option>Pending</option>
@@ -85,6 +108,7 @@
                 <option>Accepted</option>
                 <option>Completed</option>
                 <option>Cancelled</option>
+                <option>Expired</option>
               </select>
             </th>
             <th></th>
@@ -184,7 +208,7 @@
               </td>
               <td>{{ order.MTO_quantity }}</td>
               <td>{{ order.Date_Ordered }}</td>
-              <td id="fDate">{{ compDate(order.dateFinish) }}</td>
+              <td id="fDate">{{ compDate(order.dateFinish, order.id) }}</td>
               <td>{{ order.Status }}</td>
               <td>
                 <div v-if="order.Status=='Pending'">
@@ -349,6 +373,9 @@
 export default {
   data () {
     return {
+      switchCount: 0,
+      dir: 'desc',
+      dateSearch: "All",
       typeSearch: "",
       statSearch: "Pending",
       search: "",
@@ -366,14 +393,48 @@ export default {
     }
   },
   methods: {
-    compDate: function(date){
+    sortDateSubAsc: function(){
+      this.orders = this._.orderBy(this.orders, 'Date_Ordered', 'asc');
+    },
+    sortDateSubDesc: function(){
+      this.orders = this._.orderBy(this.orders, 'Date_Ordered', 'desc');
+    },
+    sortDateFinishAsc: function(){
+      this.orders = this._.orderBy(this.orders, 'dateFinish', 'asc');
+    },
+    sortDateFinishDesc: function(){
+      this.orders = this._.orderBy(this.orders, 'dateFinish', 'desc');
+    },
+    sortTypeAsc: function(){
+      this.orders = this._.orderBy(this.orders, 'Product_Type', 'asc');
+    },
+    sortTypeDesc: function(){
+      this.orders = this._.orderBy(this.orders, 'Product_Type', 'desc');
+    },
+    sortCustomerAsc: function(){
+      this.orders = this._.orderBy(this.orders, 'userData.Account_name', 'asc');
+    },
+    sortCustomerDesc: function(){
+      this.orders = this._.orderBy(this.orders, 'userData.Account_name', 'desc');
+    },
+    sortQuantityAsc: function(){
+      this.orders = this._.orderBy(this.orders, 'MTO_quantity', 'asc');
+    },
+    sortQuantityDesc: function(){
+      this.orders = this._.orderBy(this.orders, 'MTO_quantity', 'desc');
+    },
+    compDate: function(date, orderId){
+      let id = orderId;
       let newDate;
       let status = this.$moment(date, "YYYY-MM-DD").fromNow();
-      if (status.lastIndexOf("ago") != -1)
-        newDate = date + "\n(EXPIRED)";
+      if (status.lastIndexOf("ago") != -1){
+        this.$firebase.database().ref('Orders').child(id).update({Status: "Expired", dateFinish: "", orderIndicator: "true"}).then(function(){
+          newDate = date;
+        });
+      }
       else
         newDate = date;
-      return newDate
+      return newDate;
     },
     hasMeasurements(order){
       if(
@@ -416,7 +477,8 @@ export default {
         this.$firebase.database().ref('Orders').child(id).update({
           Status: "Accepted",
           dateFinish: this.dateFinish,
-          Tailor_Remarks: this.remarks
+          Tailor_Remarks: this.remarks,
+          orderIndicator: "true"
         }).then(function(){
           alert("ACCEPTANCE SUCCESFUL!");
           location.reload(true);
@@ -430,7 +492,8 @@ export default {
         this.isRejecting = true;
         this.$firebase.database().ref('Orders').child(id).update({
           Status: "Rejected",
-          Tailor_Remarks: this.remarks
+          Tailor_Remarks: this.remarks,
+          orderIndicator: "true"
         }).then(function(){
           location.reload();
         });
@@ -440,7 +503,8 @@ export default {
       this.isCompleting = true;
       this.$firebase.database().ref('Orders').child(id).update({
         Status: "Completed",
-        dateFinish: ""
+        dateFinish: "",
+        orderIndicator: "true"
       }).then(function(){
         location.reload();
       });
@@ -449,7 +513,8 @@ export default {
       this.isCancelling = true;
       this.$firebase.database().ref('Orders').child(id).update({
         Status: "Cancelled",
-        dateFinish: ""
+        dateFinish: "",
+        orderIndicator: "true"
       }).then(function(){
         location.reload();
       });
@@ -537,12 +602,15 @@ export default {
   },
   computed: {
     filteredOrders: function(){
+      let search3;
       let search2;
       let newArr;
+      //STATUS FILTER
       if(this.statSearch == "All")
         search2 = "";
       else
         search2 = this.statSearch;
+      //APPLY FILTERS
       newArr = this.orders.filter((order) =>{
         return (
           order.Status.includes(search2) &&
@@ -603,6 +671,9 @@ td button{
 }
 .mdl-dialog__title{
   white-space: pre-line;
+}
+.normalLink:hover{
+  text-decoration: underline;
 }
 #tailorAvatar {
   margin-top: 30px;
